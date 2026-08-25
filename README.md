@@ -19,10 +19,14 @@ Protocol details: see [PROTOCOL.md](PROTOCOL.md).
 ## 📶 Jak połączyć podgrzewacz KOSPEL PPE4 z WiFi (poradnik krok po kroku)
 
 ### 1. Tryb konfiguracji na piecu
-1. Na panelu pieca wejdź w menu **KONFIG** (prawy przycisk) i zatwierdź.
-2. W menu konfiguracji wybierz pozycję **WIFI**.
-3. Wybierz **KONFIG WIFI**, aby rozpocząć zestawienie połączenia — piec przejdzie w tryb parowania
+1. **Przytrzymaj środkowy przycisk** na panelu pieca, aby wejść do menu.
+2. Przejdź do menu **KONFIG** (prawy przycisk) i zatwierdź.
+3. W menu konfiguracji wybierz pozycję **WIFI**.
+4. Wybierz **KONFIG WIFI**, aby rozpocząć zestawienie połączenia — piec przejdzie w tryb parowania
    i wyświetli odliczanie (**300** sekund / „CZEKAJ”). Masz 5 minut na dokończenie konfiguracji.
+
+> 📝 Przy okazji: w menu możesz podejrzeć **numer modułu** (XXXX) — zapisz go, przyda się
+> podczas pierwszej konfiguracji w aplikacji KOSPEL PPE4.
 
 ### 2. Połącz się z siecią pieca
 4. Na telefonie/tablecie/komputerze otwórz ustawienia WiFi i połącz się z siecią o nazwie
