@@ -9,7 +9,8 @@ import aiohttp
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, Platform
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, callback
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .const import DOMAIN
@@ -72,6 +73,7 @@ class Ppe4Coordinator(DataUpdateCoordinator[dict[int, int]]):
         merged: dict[int, int] = {}
         try:
             results = await asyncio.gather(*(self.api.read(s, c) for s, c in self.BLOCKS))
+
         except UpdateFailed:
             raise
         except Exception as err:  # noqa: BLE001
@@ -83,12 +85,49 @@ class Ppe4Coordinator(DataUpdateCoordinator[dict[int, int]]):
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     host = entry.data[CONF_HOST]
-    session = aiohttp.async_get_clientsession(hass)
+    session = async_get_clientsession(hass)
     api = Ppe4Api(host, session)
     coordinator = Ppe4Coordinator(hass, api)
     await coordinator.async_config_entry_first_refresh()
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {"api": api, "coordinator": coordinator}
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    return True
+
+
+async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    return True
+
+
+@callback
+async def _discovery_scan(hass: HomeAssistant) -> None:
+    """One background scan; starts a discovery flow for each new heater."""
+    from .config_flow import async_discover_heaters
+
+    for host in await async_discover_heaters(hass):
+        # skip already-configured heaters
+        if any(
+            e.data.get(CONF_HOST) == host
+            for e in hass.config_entries.async_entries(DOMAIN)
+        ):
+            continue
+        hass.async_create_task(
+            hass.config_entries.flow.async_init(
+                DOMAIN,
+                context={"source": config_entries.SOURCE_DISCOVERY},
+                data={"host": host},
+            )
+        )
+
+
+async def async_setup(hass: HomeAssistant, config) -> bool:
+    """Run a discovery scan shortly after HA start, then every 10 minutes."""
+    from homeassistant.helpers.event import async_track_time_interval
+
+    def _schedule(now=None) -> None:
+        hass.async_create_task(_discovery_scan(hass))
+
+    async_track_time_interval(hass, _schedule, _dt.timedelta(minutes=10))
+    _LOGGER.info("KOSPEL PPE4 discovery scheduled every 10 min")
     return True
 
 

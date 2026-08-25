@@ -3,13 +3,19 @@
     "step": {
       "user": {
         "data": {
-          "host": "Host"
+          "host": "IP address"
         },
-        "description": "IP address of the KOSPEL PPE4 heater. Discovered devices: {found}"
+        "description": "Enter the IP address of the KOSPEL PPE4 heater. Heaters found on the network appear automatically as discovered devices."
+      },
+      "confirm": {
+        "description": "A KOSPEL PPE4 heater was discovered at {host}. Set it up?"
       }
     },
     "error": {
       "cannot_connect": "Failed to connect to the heater"
+    },
+    "abort": {
+      "already_configured": "This heater is already configured"
     }
   },
   "entity": {
@@ -17,12 +23,12 @@
       "temp_in": "Inlet temperature",
       "temp_out": "Outlet temperature",
       "setpoint": "Target temperature",
+      "flow": "Flow rate",
+      "power_current": "Current power",
       "energy_month": "Energy (month)",
       "water_today": "Water (today)",
       "water_month": "Water (month)",
-      "mode": "Operating mode",
-      "flow": "Flow rate",
-      "power_current": "Current power"
+      "mode": "Operating mode"
     },
     "number": {
       "target_temperature": "Target temperature",

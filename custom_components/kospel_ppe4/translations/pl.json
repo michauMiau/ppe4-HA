@@ -5,11 +5,17 @@
         "data": {
           "host": "Adres IP"
         },
-        "description": "Adres IP podgrzewacza KOSPEL PPE4. Wykryte urządzenia w sieci: {found}"
+        "description": "Podaj adres IP podgrzewacza KOSPEL PPE4. Urządzenia wykryte w sieci pojawią się automatycznie jako odkryte."
+      },
+      "confirm": {
+        "description": "Wykryto podgrzewacz KOSPEL PPE4 pod adresem {host}. Skonfigurować?"
       }
     },
     "error": {
       "cannot_connect": "Nie udało się połączyć z podgrzewaczem"
+    },
+    "abort": {
+      "already_configured": "Ten podgrzewacz jest już skonfigurowany"
     }
   },
   "entity": {
@@ -17,12 +23,12 @@
       "temp_in": "Temperatura wejściowa",
       "temp_out": "Temperatura wyjściowa",
       "setpoint": "Temperatura zadana",
+      "flow": "Przepływ",
+      "power_current": "Aktualna moc",
       "energy_month": "Energia (miesiąc)",
       "water_today": "Woda (dziś)",
       "water_month": "Woda (miesiąc)",
-      "mode": "Tryb pracy",
-      "flow": "Przepływ",
-      "power_current": "Aktualna moc"
+      "mode": "Tryb pracy"
     },
     "number": {
       "target_temperature": "Temperatura zadana",
