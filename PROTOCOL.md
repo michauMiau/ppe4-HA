@@ -18,6 +18,9 @@
 |---|---|---|
 | 1129 | flaga statusu (5=parowanie?, 1=normalny) | — |
 | 1134 / 1135 | Tin / Tout (temperatura wejścia/wyjścia) | ×0.1 °C |
+| 1137 | przepływ (tylko podczas poboru wody) | ×0.1 l/min |
+| 1138 | aktualna moc grzania (tylko podczas poboru) | ÷1000 kW |
+| 1139 / 1141 / 1145 | powiązane z grzaniem (do zbadania) | — |
 | 1140 | temperatura zadana (zapis tylko w trybie ręcznym) | ×0.1 °C |
 | 1390 | tryb: 0=profil, 1=ręczny | — |
 | 1391–1393 | Profile 1–3 (zapis działa) | ×0.1 °C |
