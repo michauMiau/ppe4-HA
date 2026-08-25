@@ -13,20 +13,20 @@
 `POST /api/write`, **Content-Type: application/json**, body = `{"<rejestr>":<wartość>}`
 (form-urlencoded NIE działa — błąd -10). Zapis nieistniejącego rejestru zwraca OK ale nic nie robi.
 
-## Mapowanie rejestrów (odczyt 1390/6)
-| Rejestr | Znaczenie | Wartości obserwowane |
+## Mapowanie rejestrów (potwierdzone na żywym urządzeniu)
+| Rejestr | Znaczenie | Skala |
 |---|---|---|
-| 1390 | tryb pracy / profil | 0 |
-| 1391 | temperatura zadana (nastawa) ×10? | 360→350 po zapisie {"1391":350} — **zapis potwierdzony działaniem** |
-| 1392 | min nastawy | 350 |
-| 1393 | ? | 450 |
-| 1394 | ? | 550 |
-| 1395 | max nastawy | 700 |
-
-Uwaga: 350 przy pokazanym w appce TEMP... wartości w °C×10 prawdopodobnie (35°C na ekranie tutorialu). Do potwierdzenia: jednostka i czy 1391 to °C×10.
-- 1128–1152: status/ikony/czas (1143=15000, 1144=10000 — może moce W)
-- 1000–1043: limity/konfiguracja read-only-ish (min/max profili: 300..600/750)
-- 1520+: statystyki 32-bit (kWh/m³, okresy rok/tydzień)
+| 1129 | flaga statusu (5=parowanie?, 1=normalny) | — |
+| 1134 / 1135 | Tin / Tout (temperatura wejścia/wyjścia) | ×0.1 °C |
+| 1140 | temperatura zadana (zapis tylko w trybie ręcznym) | ×0.1 °C |
+| 1390 | tryb: 0=profil, 1=ręczny | — |
+| 1391–1393 | Profile 1–3 (zapis działa) | ×0.1 °C |
+| 1394/1395 | limity profili | ×0.1 °C |
+| 1008/1009 | min/max nastawy (300..600) | ×0.1 °C |
+| 1143/1144 | moce (15000, 10000 W) | — |
+| 1520 | energia — miesiąc (32-bit lo; para z 1521) | ÷1000 kWh |
+| 1578–1638 | woda dziennie, 31 dni od dziś wstecz | ×0.1 l |
+| 1644/1645 | woda — miesiąc (para 32-bit) | ÷100 l |
 
 ## Błędy
 - `-10`: niedozwolony znak (zły content-type/format)

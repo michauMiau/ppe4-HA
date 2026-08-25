@@ -57,7 +57,7 @@ class Ppe4Coordinator(DataUpdateCoordinator[dict[int, int]]):
     """Poll the heater for all known registers."""
 
     # (start, count) blocks we care about
-    BLOCKS = ((1000, 44), (1128, 25), (1390, 6), (1520, 48))
+    BLOCKS = ((1000, 44), (1128, 25), (1390, 6), (1520, 48), (1576, 64))
 
     def __init__(self, hass: HomeAssistant, api: Ppe4Api) -> None:
         super().__init__(

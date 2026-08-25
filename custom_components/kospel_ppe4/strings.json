@@ -5,7 +5,7 @@
         "data": {
           "host": "Host"
         },
-        "description": "IP address of the KOSPEL PPE4 heater"
+        "description": "IP address of the KOSPEL PPE4 heater. Discovered devices: {found}"
       }
     },
     "error": {
@@ -17,7 +17,9 @@
       "temp_in": "Inlet temperature",
       "temp_out": "Outlet temperature",
       "setpoint": "Target temperature",
-      "power_max": "Heater power",
+      "energy_month": "Energy (month)",
+      "water_today": "Water (today)",
+      "water_month": "Water (month)",
       "mode": "Operating mode"
     },
     "number": {

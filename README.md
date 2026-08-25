@@ -20,7 +20,15 @@ Integration for the KOSPEL PPE4 Water heater in Home Assistant.
 2. Restart Home Assistant.
 
 ### Add the device
-*Settings → Devices & Services → Add Integration → **KOSPEL PPE4*** and enter the heater's IP address.
+[![Open your Home Assistant instance and start setting up.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=kospel_ppe4)
+
+Or: *Settings → Devices & Services → Add Integration → **KOSPEL PPE4***.
+The config flow **auto-discovers** heaters on the local network — just pick yours from the list.
+
+### Energy Dashboard
+The `Energy (month)` sensor is a `total_increasing` kWh meter and the water sensors
+are `total_increasing` liters meters — add them in
+*Settings → Dashboards → Energy → Individual devices*.
 
 Protocol details: see [PROTOCOL.md](PROTOCOL.md).
 

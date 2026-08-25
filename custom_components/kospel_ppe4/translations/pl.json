@@ -5,7 +5,7 @@
         "data": {
           "host": "Adres IP"
         },
-        "description": "Adres IP podgrzewacza KOSPEL PPE4"
+        "description": "Adres IP podgrzewacza KOSPEL PPE4. Wykryte urządzenia w sieci: {found}"
       }
     },
     "error": {
@@ -17,7 +17,9 @@
       "temp_in": "Temperatura wejściowa",
       "temp_out": "Temperatura wyjściowa",
       "setpoint": "Temperatura zadana",
-      "power_max": "Moc podgrzewacza",
+      "energy_month": "Energia (miesiąc)",
+      "water_today": "Woda (dziś)",
+      "water_month": "Woda (miesiąc)",
       "mode": "Tryb pracy"
     },
     "number": {
