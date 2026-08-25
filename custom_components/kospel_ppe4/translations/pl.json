@@ -1,0 +1,29 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "host": "Adres IP"
+        },
+        "description": "Adres IP podgrzewacza KOSPEL PPE4"
+      }
+    },
+    "error": {
+      "cannot_connect": "Nie udało się połączyć z podgrzewaczem"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "reg_1391": "Temperatura zadana",
+      "reg_1392": "Minimalna nastawa",
+      "reg_1393": "Dolny limit",
+      "reg_1394": "Górny limit",
+      "reg_1395": "Maksymalna nastawa",
+      "reg_1146": "Aktualna moc",
+      "mode": "Tryb pracy"
+    },
+    "number": {
+      "target_temperature": "Temperatura zadana"
+    }
+  }
+}

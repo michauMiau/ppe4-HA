@@ -1,0 +1,29 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "data": {
+          "host": "Host"
+        },
+        "description": "IP address of the KOSPEL PPE4 heater"
+      }
+    },
+    "error": {
+      "cannot_connect": "Failed to connect to the heater"
+    }
+  },
+  "entity": {
+    "sensor": {
+      "reg_1391": "Target temperature",
+      "reg_1392": "Minimum setpoint",
+      "reg_1393": "Limit low",
+      "reg_1394": "Limit high",
+      "reg_1395": "Maximum setpoint",
+      "reg_1146": "Current power",
+      "mode": "Operating mode"
+    },
+    "number": {
+      "target_temperature": "Target temperature"
+    }
+  }
+}
