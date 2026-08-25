@@ -14,16 +14,17 @@
   },
   "entity": {
     "sensor": {
-      "reg_1391": "Target temperature",
-      "reg_1392": "Minimum setpoint",
-      "reg_1393": "Limit low",
-      "reg_1394": "Limit high",
-      "reg_1395": "Maximum setpoint",
-      "reg_1146": "Current power",
+      "temp_in": "Inlet temperature",
+      "temp_out": "Outlet temperature",
+      "setpoint": "Target temperature",
+      "power_max": "Heater power",
       "mode": "Operating mode"
     },
     "number": {
-      "target_temperature": "Target temperature"
+      "target_temperature": "Target temperature",
+      "profile_1": "Profile 1",
+      "profile_2": "Profile 2",
+      "profile_3": "Profile 3"
     }
   }
 }

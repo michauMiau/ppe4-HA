@@ -14,16 +14,17 @@
   },
   "entity": {
     "sensor": {
-      "reg_1391": "Temperatura zadana",
-      "reg_1392": "Minimalna nastawa",
-      "reg_1393": "Dolny limit",
-      "reg_1394": "Górny limit",
-      "reg_1395": "Maksymalna nastawa",
-      "reg_1146": "Aktualna moc",
+      "temp_in": "Temperatura wejściowa",
+      "temp_out": "Temperatura wyjściowa",
+      "setpoint": "Temperatura zadana",
+      "power_max": "Moc podgrzewacza",
       "mode": "Tryb pracy"
     },
     "number": {
-      "target_temperature": "Temperatura zadana"
+      "target_temperature": "Temperatura zadana",
+      "profile_1": "Profil 1",
+      "profile_2": "Profil 2",
+      "profile_3": "Profil 3"
     }
   }
 }

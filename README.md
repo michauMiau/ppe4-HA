@@ -7,10 +7,20 @@ Integration for the KOSPEL PPE4 Water heater in Home Assistant.
 - **Number entity**: set the target temperature (slider) — written directly to the heater
 - Local HTTP polling (30 s), no cloud
 
-## Installation (custom component)
+## Installation
+
+### HACS (recommended)
+1. **HACS → ⋮ (top right) → Custom repositories**
+2. Repository: `michauMiau/ppe4-HA`, category: **Integration**
+3. Click **Download** on *KOSPEL PPE4*.
+4. Restart Home Assistant.
+
+### Manual
 1. Copy `custom_components/kospel_ppe4/` into your HA `config/custom_components/` directory.
 2. Restart Home Assistant.
-3. *Settings → Devices & Services → Add Integration → **KOSPEL PPE4*** and enter the heater's IP address.
+
+### Add the device
+*Settings → Devices & Services → Add Integration → **KOSPEL PPE4*** and enter the heater's IP address.
 
 Protocol details: see [PROTOCOL.md](PROTOCOL.md).
 

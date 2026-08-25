@@ -1,13 +1,9 @@
 """Sensors for KOSPEL PPE4."""
 from __future__ import annotations
 
-from homeassistant.components.sensor import (
-    SensorDeviceClass,
-    SensorEntity,
-    SensorStateClass,
-)
+from homeassistant.components.sensor import SensorDeviceClass, SensorEntity
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import UnitOfTemperature, UnitOfVolumeFlowRate, UnitOfPower
+from homeassistant.const import UnitOfTemperature, UnitOfPower
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -21,18 +17,14 @@ async def async_setup_entry(
     data = hass.data[DOMAIN][entry.entry_id]
     coordinator = data["coordinator"]
     async_add_entities([
-        Ppe4Sensor(coordinator, entry, 1391, "Target temperature", UnitOfTemperature.CELSIUS,
-                   SensorDeviceClass.TEMPERATURE, scale=0.1),
-        Ppe4Sensor(coordinator, entry, 1392, "Minimum setpoint", UnitOfTemperature.CELSIUS,
-                   SensorDeviceClass.TEMPERATURE, scale=0.1),
-        Ppe4Sensor(coordinator, entry, 1393, "Limit low", UnitOfTemperature.CELSIUS,
-                   SensorDeviceClass.TEMPERATURE, scale=0.1),
-        Ppe4Sensor(coordinator, entry, 1394, "Limit high", UnitOfTemperature.CELSIUS,
-                   SensorDeviceClass.TEMPERATURE, scale=0.1),
-        Ppe4Sensor(coordinator, entry, 1395, "Maximum setpoint", UnitOfTemperature.CELSIUS,
-                   SensorDeviceClass.TEMPERATURE, scale=0.1),
-        Ppe4Sensor(coordinator, entry, 1146, "Current power", UnitOfPower.WATT,
-                   SensorDeviceClass.POWER, scale=10.0),
+        Ppe4Sensor(coordinator, entry, 1134, "temp_in", UnitOfTemperature.CELSIUS,
+                   SensorDeviceClass.TEMPERATURE, 0.1),
+        Ppe4Sensor(coordinator, entry, 1135, "temp_out", UnitOfTemperature.CELSIUS,
+                   SensorDeviceClass.TEMPERATURE, 0.1),
+        Ppe4Sensor(coordinator, entry, 1140, "setpoint", UnitOfTemperature.CELSIUS,
+                   SensorDeviceClass.TEMPERATURE, 0.1),
+        Ppe4Sensor(coordinator, entry, 1143, "power_max", UnitOfPower.KILO_WATT,
+                   None, 0.001),
         Ppe4ModeSensor(coordinator, entry),
     ])
 
@@ -55,12 +47,11 @@ class Ppe4Entity(CoordinatorEntity):
 
 
 class Ppe4Sensor(Ppe4Entity, SensorEntity):
-    def __init__(self, coordinator, entry, register: int, name: str,
-                 unit: str | None = None, device_class=None, scale: float = 1.0) -> None:
+    def __init__(self, coordinator, entry, register: int, key: str,
+                 unit: str | None, device_class, scale: float) -> None:
         super().__init__(coordinator, entry)
         self._register = register
-        self._attr_translation_key = f"reg_{register}"
-        self._attr_native_value = None
+        self._attr_translation_key = key
         if unit:
             self._attr_native_unit_of_measurement = unit
         if device_class:
@@ -77,21 +68,16 @@ class Ppe4Sensor(Ppe4Entity, SensorEntity):
     @property
     def native_value(self):
         raw = self.coordinator.data.get(self._register)
-        if raw is None:
-            return None
-        return round(raw * self._scale, 2)
+        return None if raw is None else round(raw * self._scale, 2)
 
 
 class Ppe4ModeSensor(Ppe4Entity, SensorEntity):
-    """Register 1390 — operating mode / profile."""
+    """Register 1390 — 0 = profile, 1 = manual."""
 
     _attr_translation_key = "mode"
-
-    MODES = {0: "off", 1: "manual", 2: "eco", 3: "comfort", 4: "boost"}
+    _MODES = {0: "profile", 1: "manual"}
 
     @property
     def native_value(self) -> str | None:
         raw = self.coordinator.data.get(1390)
-        if raw is None:
-            return None
-        return str(raw)
+        return None if raw is None else self._MODES.get(raw, str(raw))
