@@ -12,6 +12,7 @@ from homeassistant.const import (
     UnitOfPower,
     UnitOfTemperature,
     UnitOfVolume,
+    UnitOfVolumeFlowRate,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -32,6 +33,11 @@ async def async_setup_entry(
                    SensorDeviceClass.TEMPERATURE, 0.1),
         Ppe4Sensor(coordinator, entry, 1140, "setpoint", UnitOfTemperature.CELSIUS,
                    SensorDeviceClass.TEMPERATURE, 0.1),
+        # Live flow and power (non-zero only while heating)
+        Ppe4Sensor(coordinator, entry, 1137, "flow", UnitOfVolumeFlowRate.LITERS_PER_MINUTE,
+                   None, 0.1),
+        Ppe4Sensor(coordinator, entry, 1138, "power_current", UnitOfPower.KILO_WATT,
+                   SensorDeviceClass.POWER, 0.001),
         # Energy meter for the Energy Dashboard (register 1520 = month kWh ×1000)
         Ppe4Sensor(coordinator, entry, 1520, "energy_month", UnitOfEnergy.KILO_WATT_HOUR,
                    SensorDeviceClass.ENERGY, 0.001, state_class=SensorStateClass.TOTAL_INCREASING),
