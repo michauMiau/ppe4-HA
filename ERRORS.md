@@ -25,8 +25,17 @@ statusu (blok 1128–1152 / lista `FillErrorList`/`FillWarningList` w TuData).
 
 ## Wartości obserwowane
 - Rejestr **1129**: `1` = normalna praca, `5` = grzanie aktywne / tryb parowania WiFi
-- Rejestry **1130–1133**: prawdopodobnie flagi błędów (były 0 przy braku usterek)
+- Rejestry **1130–1133**: flagi błędów (0 = OK); integracja HA pokazuje je jako binary sensor `Usterka` + atrybuty `flag_1130..flag_1133`
 - **1136 = 280** — stałe, może kod konfiguracji/mocy urządzenia
+
+## Mapowanie błędów na rejestry (do potwierdzenia)
+Aplikacja wypełnia listy błędów/ostrzeżeń z bloku statusu. Prawdopodobne przypisanie
+(kolejność tekstów w zasobach odpowiada kolejności bitów/rejestrów):
+- 1130 → błędy krytyczne 1–8 (czujniki, turbina, przegrzanie)
+- 1131 → błędy 9–12 (przepływ, sieć, konfiguracja)
+- 1132/1133 → ostrzeżenia / błędy komunikacji (zegar, I2C, EEPROM)
+
+Weryfikacja: wymusić usterkę (np. odłączyć czujnik) i odczytać, który rejestr się zmienia.
 
 ## Uwaga
 Dokładne mapowanie kod liczbowy ↔ tekst wymaga jeszcze korelacji z rejestrami

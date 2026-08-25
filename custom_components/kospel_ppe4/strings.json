@@ -30,6 +30,9 @@
       "water_month": "Water (month)",
       "mode": "Operating mode"
     },
+    "binary_sensor": {
+      "fault": "Fault"
+    },
     "number": {
       "target_temperature": "Target temperature",
       "profile_1": "Profile 1",
