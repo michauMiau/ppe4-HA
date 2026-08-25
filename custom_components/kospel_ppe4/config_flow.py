@@ -44,18 +44,18 @@ class KospelPpe4ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         # show discovered devices (if any) above the manual entry form
         data_schema = STEP_DATA_SCHEMA
-        description_placeholders = {}
-        if not user_input and not self._discovered:
+        description_placeholders = {"found": "—"}
+        if not user_input:
             try:
                 self._discovered = await discover(self.hass)
             except Exception:  # noqa: BLE001
                 self._discovered = {}
-        if self._discovered:
-            hosts = list(self._discovered)
-            data_schema = vol.Schema({vol.Required(CONF_HOST, default=hosts[0]): vol.In(hosts)})
-            description_placeholders["found"] = ", ".join(
-                f"{ip} ({name})" for ip, name in self._discovered.items()
-            )
+            if self._discovered:
+                hosts = list(self._discovered)
+                data_schema = vol.Schema({vol.Required(CONF_HOST, default=hosts[0]): vol.In(hosts)})
+                description_placeholders["found"] = ", ".join(
+                    f"{ip} ({name})" for ip, name in self._discovered.items()
+                )
         return self.async_show_form(
             step_id="user",
             data_schema=data_schema,
