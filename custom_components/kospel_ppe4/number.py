@@ -32,8 +32,8 @@ async def async_setup_entry(
 
 
 class _Ppe4BaseNumber(Ppe4Entity, NumberEntity):
-    _attr_mode = NumberMode.SLIDER
-    _attr_native_step = 0.5
+    _attr_mode = NumberMode.BOX
+    _attr_native_step = 1.0
     _attr_icon = "mdi:water-boiler"
 
     def __init__(self, coordinator, api, entry: ConfigEntry,
