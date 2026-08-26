@@ -4,6 +4,7 @@ from __future__ import annotations
 import asyncio
 import datetime as _dt
 import logging
+import time
 
 import aiohttp
 
@@ -55,30 +56,44 @@ class Ppe4Api:
 
 
 class Ppe4Coordinator(DataUpdateCoordinator[dict[int, int]]):
-    """Poll the heater for all known registers."""
+    """Poll the heater for all known registers.
+
+    Live block (1128+, temperatures/flow/power) is refreshed every 5 s to match
+    the official app; slow blocks (limits, profiles, statistics) every 30 s.
+    """
 
     # (start, count) blocks we care about — max 48 registers per request
-    BLOCKS = ((1000, 44), (1128, 25), (1390, 6), (1520, 48), (1576, 48), (1624, 26))
+    LIVE_BLOCKS = ((1128, 25),)
+    SLOW_BLOCKS = ((1000, 44), (1390, 6), (1520, 48), (1576, 48), (1624, 26))
 
     def __init__(self, hass: HomeAssistant, api: Ppe4Api) -> None:
         super().__init__(
             hass,
             _LOGGER,
             name=DOMAIN,
-            update_interval=_dt.timedelta(seconds=SCAN_INTERVAL),
+            update_interval=_dt.timedelta(seconds=5),
         )
         self.api = api
+        self._last_slow = 0.0
 
     async def _async_update_data(self) -> dict[int, int]:
         merged: dict[int, int] = {}
         try:
-            results = await asyncio.gather(*(self.api.read(s, c) for s, c in self.BLOCKS))
-
+            live = await asyncio.gather(*(self.api.read(s, c) for s, c in self.LIVE_BLOCKS))
+            now = time.monotonic()
+            if now - self._last_slow > SCAN_INTERVAL - 2:  # slow refresh due
+                slow = await asyncio.gather(*(self.api.read(s, c) for s, c in self.SLOW_BLOCKS))
+                self._last_slow = now
+                for res in slow:
+                    merged.update(res)
+            else:
+                # reuse previous slow values
+                merged.update(self.data or {})
         except UpdateFailed:
             raise
         except Exception as err:  # noqa: BLE001
             raise UpdateFailed(str(err)) from err
-        for res in results:
+        for res in live:
             merged.update(res)
         return merged
 
