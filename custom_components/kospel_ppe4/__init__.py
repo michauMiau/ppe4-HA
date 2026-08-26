@@ -57,8 +57,8 @@ class Ppe4Api:
 class Ppe4Coordinator(DataUpdateCoordinator[dict[int, int]]):
     """Poll the heater for all known registers."""
 
-    # (start, count) blocks we care about
-    BLOCKS = ((1000, 44), (1128, 25), (1390, 6), (1520, 48), (1576, 64))
+    # (start, count) blocks we care about — max 48 registers per request
+    BLOCKS = ((1000, 44), (1128, 25), (1390, 6), (1520, 48), (1576, 48), (1624, 26))
 
     def __init__(self, hass: HomeAssistant, api: Ppe4Api) -> None:
         super().__init__(
@@ -126,6 +126,7 @@ async def async_setup(hass: HomeAssistant, config) -> bool:
     def _schedule(now=None) -> None:
         hass.async_create_task(_discovery_scan(hass))
 
+    hass.loop.call_soon_threadsafe(_schedule)
     async_track_time_interval(hass, _schedule, _dt.timedelta(minutes=10))
     _LOGGER.info("KOSPEL PPE4 discovery scheduled every 10 min")
     return True
