@@ -66,12 +66,12 @@ class Ppe4Coordinator(DataUpdateCoordinator[dict[int, int]]):
     LIVE_BLOCKS = ((1128, 25),)
     SLOW_BLOCKS = ((1000, 44), (1390, 6), (1520, 48), (1576, 48), (1624, 26))
 
-    def __init__(self, hass: HomeAssistant, api: Ppe4Api) -> None:
+    def __init__(self, hass: HomeAssistant, api: Ppe4Api, scan_interval: int = 5) -> None:
         super().__init__(
             hass,
             _LOGGER,
             name=DOMAIN,
-            update_interval=_dt.timedelta(seconds=5),
+            update_interval=_dt.timedelta(seconds=scan_interval),
         )
         self.api = api
         self._last_slow = 0.0
@@ -102,11 +102,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     host = entry.data[CONF_HOST]
     session = async_get_clientsession(hass)
     api = Ppe4Api(host, session)
-    coordinator = Ppe4Coordinator(hass, api)
+    interval = int(entry.options.get("scan_interval", 5))
+    coordinator = Ppe4Coordinator(hass, api, interval)
     await coordinator.async_config_entry_first_refresh()
     hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {"api": api, "coordinator": coordinator}
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    entry.async_on_unload(entry.add_update_listener(_async_update_listener))
     return True
+
+
+async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
+    """Reload the integration when options change."""
+    await hass.config_entries.async_reload(entry.entry_id)
 
 
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

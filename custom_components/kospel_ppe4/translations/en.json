@@ -18,6 +18,17 @@
       "already_configured": "This heater is already configured"
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "host": "IP address",
+          "scan_interval": "Live polling interval (seconds)"
+        },
+        "description": "Live data (temperatures, flow, power) refreshes at this interval. Statistics update every 30 s regardless."
+      }
+    }
+  },
   "entity": {
     "sensor": {
       "temp_in": "Inlet temperature",
