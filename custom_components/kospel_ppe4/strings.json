@@ -30,26 +30,33 @@
     }
   },
   "entity": {
+    "climate": {
+      "thermostat": {
+        "name": "Thermostat",
+        "state_attributes": {
+          "target_temp_step": { "default": 1.0 }
+        }
+      }
+    },
     "sensor": {
-      "temp_in": "Inlet temperature",
-      "temp_out": "Outlet temperature",
-      "setpoint": "Target temperature",
-      "flow": "Flow rate",
-      "power_current": "Current power",
-      "energy_month": "Energy (month)",
-      "water_today": "Water (today)",
-      "water_month": "Water (month)",
-      "mode": "Operating mode",
-      "status": "Status"
+      "temp_in": { "name": "Inlet water temperature" },
+      "temp_out": { "name": "Outlet water temperature" },
+      "setpoint": { "name": "Target temperature setting" },
+      "flow": { "name": "Water flow rate" },
+      "power_current": { "name": "Current heating power" },
+      "energy_month": { "name": "Energy used this month" },
+      "water_today": { "name": "Water used today" },
+      "water_month": { "name": "Water used this month" },
+      "mode": { "name": "Operating mode" },
+      "status": { "name": "Heater status" }
     },
     "binary_sensor": {
-      "fault": "Fault"
+      "fault": { "name": "Fault detected" }
     },
     "number": {
-      "target_temperature": "Target temperature",
-      "profile_1": "Profile 1",
-      "profile_2": "Profile 2",
-      "profile_3": "Profile 3"
+      "profile_1": { "name": "Profile 1 temperature" },
+      "profile_2": { "name": "Profile 2 temperature" },
+      "profile_3": { "name": "Profile 3 temperature" }
     }
   }
 }

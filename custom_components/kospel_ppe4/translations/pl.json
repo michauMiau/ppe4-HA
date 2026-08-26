@@ -30,26 +30,30 @@
     }
   },
   "entity": {
+    "climate": {
+      "thermostat": {
+        "name": "Termostat"
+      }
+    },
     "sensor": {
-      "temp_in": "Temperatura wejściowa",
-      "temp_out": "Temperatura wyjściowa",
-      "setpoint": "Temperatura zadana",
-      "flow": "Przepływ",
-      "power_current": "Aktualna moc",
-      "energy_month": "Energia (miesiąc)",
-      "water_today": "Woda (dziś)",
-      "water_month": "Woda (miesiąc)",
-      "mode": "Tryb pracy",
-      "status": "Status"
+      "temp_in": { "name": "Temperatura wody wejściowej" },
+      "temp_out": { "name": "Temperatura wody wyjściowej" },
+      "setpoint": { "name": "Ustawiona temperatura docelowa" },
+      "flow": { "name": "Przepływ wody" },
+      "power_current": { "name": "Aktualna moc grzania" },
+      "energy_month": { "name": "Energia zużyta w tym miesiącu" },
+      "water_today": { "name": "Woda zużyta dzisiaj" },
+      "water_month": { "name": "Woda zużyta w tym miesiącu" },
+      "mode": { "name": "Tryb pracy" },
+      "status": { "name": "Status podgrzewacza" }
     },
     "binary_sensor": {
-      "fault": "Usterka"
+      "fault": { "name": "Wykryta usterka" }
     },
     "number": {
-      "target_temperature": "Temperatura zadana",
-      "profile_1": "Profil 1",
-      "profile_2": "Profil 2",
-      "profile_3": "Profil 3"
+      "profile_1": { "name": "Temperatura profilu 1" },
+      "profile_2": { "name": "Temperatura profilu 2" },
+      "profile_3": { "name": "Temperatura profilu 3" }
     }
   }
 }
