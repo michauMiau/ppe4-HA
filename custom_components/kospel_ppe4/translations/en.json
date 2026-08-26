@@ -51,7 +51,7 @@
         "name": "Water flow rate"
       },
       "power_current": {
-        "name": "Current heating power"
+        "name": "Power"
       },
       "energy_month": {
         "name": "Energy used this month"

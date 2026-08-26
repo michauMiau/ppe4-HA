@@ -46,7 +46,7 @@
         "name": "Przepływ wody"
       },
       "power_current": {
-        "name": "Aktualna moc grzania"
+        "name": "Moc"
       },
       "energy_month": {
         "name": "Energia zużyta w tym miesiącu"
