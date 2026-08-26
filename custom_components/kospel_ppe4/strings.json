@@ -34,29 +34,59 @@
       "thermostat": {
         "name": "Thermostat",
         "state_attributes": {
-          "target_temp_step": { "default": 1.0 }
+          "target_temp_step": {
+            "default": 1.0
+          }
         }
       }
     },
     "sensor": {
-      "temp_in": { "name": "Inlet water temperature" },
-      "temp_out": { "name": "Outlet water temperature" },
-      "setpoint": { "name": "Target temperature setting" },
-      "flow": { "name": "Water flow rate" },
-      "power_current": { "name": "Current heating power" },
-      "energy_month": { "name": "Energy used this month" },
-      "water_today": { "name": "Water used today" },
-      "water_month": { "name": "Water used this month" },
-      "mode": { "name": "Operating mode" },
-      "status": { "name": "Heater status" }
+      "temp_in": {
+        "name": "Inlet water temperature"
+      },
+      "temp_out": {
+        "name": "Outlet water temperature"
+      },
+      "flow": {
+        "name": "Water flow rate"
+      },
+      "power_current": {
+        "name": "Current heating power"
+      },
+      "energy_month": {
+        "name": "Energy used this month"
+      },
+      "water_today": {
+        "name": "Water used today"
+      },
+      "water_month": {
+        "name": "Water used this month"
+      },
+      "mode": {
+        "name": "Operating mode"
+      },
+      "status": {
+        "name": "Heater status"
+      },
+      "energy_today": {
+        "name": "Energy used today"
+      }
     },
     "binary_sensor": {
-      "fault": { "name": "Fault detected" }
+      "fault": {
+        "name": "Fault detected"
+      }
     },
     "number": {
-      "profile_1": { "name": "Profile 1 temperature" },
-      "profile_2": { "name": "Profile 2 temperature" },
-      "profile_3": { "name": "Profile 3 temperature" }
+      "profile_1": {
+        "name": "Profile 1 temperature"
+      },
+      "profile_2": {
+        "name": "Profile 2 temperature"
+      },
+      "profile_3": {
+        "name": "Profile 3 temperature"
+      }
     }
   }
 }

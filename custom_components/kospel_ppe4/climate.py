@@ -68,9 +68,13 @@ class Ppe4Climate(Ppe4Entity, ClimateEntity):
 
     @property
     def hvac_action(self) -> HVACAction:
-        status = self.coordinator.data.get(1129)
+        # Heating only when water is actually flowing and power is drawn;
+        # status register alone (1129=5) also shows during WiFi pairing.
+        flow = self.coordinator.data.get(1137, 0)
         power = self.coordinator.data.get(1138, 0)
-        if status == 5 or power > 0:
+        if power > 0:
+            return HVACAction.HEATING
+        if flow > 0:
             return HVACAction.HEATING
         return HVACAction.IDLE
 
