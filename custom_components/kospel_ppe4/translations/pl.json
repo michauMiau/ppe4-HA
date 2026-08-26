@@ -36,24 +36,52 @@
       }
     },
     "sensor": {
-      "temp_in": { "name": "Temperatura wody wejściowej" },
-      "temp_out": { "name": "Temperatura wody wyjściowej" },
-      "setpoint": { "name": "Ustawiona temperatura docelowa" },
-      "flow": { "name": "Przepływ wody" },
-      "power_current": { "name": "Aktualna moc grzania" },
-      "energy_month": { "name": "Energia zużyta w tym miesiącu" },
-      "water_today": { "name": "Woda zużyta dzisiaj" },
-      "water_month": { "name": "Woda zużyta w tym miesiącu" },
-      "mode": { "name": "Tryb pracy" },
-      "status": { "name": "Status podgrzewacza" }
+      "temp_in": {
+        "name": "Temperatura wody wejściowej"
+      },
+      "temp_out": {
+        "name": "Temperatura wody wyjściowej"
+      },
+      "flow": {
+        "name": "Przepływ wody"
+      },
+      "power_current": {
+        "name": "Aktualna moc grzania"
+      },
+      "energy_month": {
+        "name": "Energia zużyta w tym miesiącu"
+      },
+      "water_today": {
+        "name": "Woda zużyta dzisiaj"
+      },
+      "water_month": {
+        "name": "Woda zużyta w tym miesiącu"
+      },
+      "mode": {
+        "name": "Tryb pracy"
+      },
+      "status": {
+        "name": "Status podgrzewacza"
+      },
+      "energy_today": {
+        "name": "Energia zużyta dzisiaj"
+      }
     },
     "binary_sensor": {
-      "fault": { "name": "Wykryta usterka" }
+      "fault": {
+        "name": "Wykryta usterka"
+      }
     },
     "number": {
-      "profile_1": { "name": "Temperatura profilu 1" },
-      "profile_2": { "name": "Temperatura profilu 2" },
-      "profile_3": { "name": "Temperatura profilu 3" }
+      "profile_1": {
+        "name": "Temperatura profilu 1"
+      },
+      "profile_2": {
+        "name": "Temperatura profilu 2"
+      },
+      "profile_3": {
+        "name": "Temperatura profilu 3"
+      }
     }
   }
 }

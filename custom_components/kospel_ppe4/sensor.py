@@ -32,8 +32,6 @@ async def async_setup_entry(
                    SensorDeviceClass.TEMPERATURE, 0.1),
         Ppe4Sensor(coordinator, entry, 1135, "temp_out", UnitOfTemperature.CELSIUS,
                    SensorDeviceClass.TEMPERATURE, 0.1),
-        Ppe4Sensor(coordinator, entry, 1140, "setpoint", UnitOfTemperature.CELSIUS,
-                   SensorDeviceClass.TEMPERATURE, 0.1),
         # Live flow and power (non-zero only while heating)
         Ppe4Sensor(coordinator, entry, 1137, "flow", UnitOfVolumeFlowRate.LITERS_PER_MINUTE,
                    None, 0.1),
@@ -41,6 +39,9 @@ async def async_setup_entry(
                    SensorDeviceClass.POWER, 0.001),
         # Energy meter for the Energy Dashboard (register 1520 = month kWh ×1000)
         Ppe4Sensor(coordinator, entry, 1520, "energy_month", UnitOfEnergy.KILO_WATT_HOUR,
+                   SensorDeviceClass.ENERGY, 0.001, state_class=SensorStateClass.TOTAL_INCREASING),
+        # Energy today: register 1510 = today kWh ×1000
+        Ppe4Sensor(coordinator, entry, 1510, "energy_today", UnitOfEnergy.KILO_WATT_HOUR,
                    SensorDeviceClass.ENERGY, 0.001, state_class=SensorStateClass.TOTAL_INCREASING),
         # Water: today (1578, ×0.1 l) and this month (1644/1645 pair handled below)
         Ppe4Sensor(coordinator, entry, 1578, "water_today", UnitOfVolume.LITERS,
@@ -73,6 +74,15 @@ class Ppe4Entity(CoordinatorEntity):
 class Ppe4Sensor(Ppe4Entity, SensorEntity):
     """Generic register-backed sensor."""
 
+    # icons per translation key
+    ICONS = {
+        "flow": "mdi:water-pump",
+        "power_current": "mdi:lightning-bolt",
+        "energy_month": "mdi:calendar-month",
+        "energy_today": "mdi:counter",
+        "water_today": "mdi:cup-water",
+    }
+
     def __init__(self, coordinator, entry, register: int, key: str, unit,
                  device_class, scale: float, state_class=None) -> None:  # noqa: PLR0913 - explicit config
         super().__init__(coordinator, entry, key)
@@ -80,6 +90,8 @@ class Ppe4Sensor(Ppe4Entity, SensorEntity):
         self._attr_translation_key = key
         self._attr_native_unit_of_measurement = unit
         self._attr_device_class = device_class
+        if key in self.ICONS:
+            self._attr_icon = self.ICONS[key]
         self._scale = scale
         if state_class:
             self._attr_state_class = state_class
@@ -121,6 +133,7 @@ class Ppe4ModeSensor(Ppe4Entity, SensorEntity):
     """Register 1390 — 0 = profile, 1 = manual."""
 
     _attr_translation_key = "mode"
+    _attr_icon = "mdi:state-machine"
     _MODES = {0: "profile", 1: "manual"}
 
     def __init__(self, coordinator, entry: ConfigEntry) -> None:
