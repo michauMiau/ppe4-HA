@@ -34,7 +34,7 @@ Protocol details: see [PROTOCOL.md](PROTOCOL.md).
 
 ---
 
-## 📶 Jak połączyć podgrzewacz KOSPEL PPE4 z WiFi (poradnik krok po kroku)
+## 📶 Jak połączyć podgrzewacz KOSPEL PPE4 z WiFi bez aplikacji (polish guide)
 
 ### 1. Tryb konfiguracji na piecu
 1. **Przytrzymaj środkowy przycisk** na panelu pieca, aby wejść do menu.
