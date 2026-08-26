@@ -4,6 +4,7 @@ from __future__ import annotations
 from homeassistant.components.binary_sensor import BinarySensorEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -18,8 +19,7 @@ FAULT_REGISTERS = (1130, 1131, 1132, 1133)
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    data = hass.data[DOMAIN][entry.entry_id]
-    coordinator = data["coordinator"]
+    coordinator = entry.runtime_data.coordinator
     async_add_entities([Ppe4FaultSensor(coordinator, entry)])
 
 
@@ -27,8 +27,11 @@ class Ppe4FaultSensor(Ppe4Entity, BinarySensorEntity):
     """ON when any fault flag register is non-zero."""
 
     _attr_translation_key = "fault"
-    _attr_device_class = None  # generic problem-style sensor
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_icon = "mdi:alert-circle"
+
+    def __init__(self, coordinator, entry: ConfigEntry) -> None:
+        super().__init__(coordinator, entry, "fault")
 
     @property
     def is_on(self) -> bool | None:

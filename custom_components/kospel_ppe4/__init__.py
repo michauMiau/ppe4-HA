@@ -5,6 +5,7 @@ import asyncio
 import datetime as _dt
 import logging
 import time
+from dataclasses import dataclass
 
 import aiohttp
 
@@ -21,6 +22,14 @@ _LOGGER = logging.getLogger(__name__)
 PLATFORMS: list[Platform] = [Platform.SENSOR, Platform.NUMBER, Platform.BINARY_SENSOR]
 
 SCAN_INTERVAL = 30
+
+
+@dataclass
+class Ppe4RuntimeData:
+    """Runtime data stored on the config entry (HA 2024+ pattern)."""
+
+    api: "Ppe4Api"
+    coordinator: "Ppe4Coordinator"
 
 
 class Ppe4Api:
@@ -105,7 +114,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     interval = int(entry.options.get("scan_interval", 5))
     coordinator = Ppe4Coordinator(hass, api, interval)
     await coordinator.async_config_entry_first_refresh()
-    hass.data.setdefault(DOMAIN, {})[entry.entry_id] = {"api": api, "coordinator": coordinator}
+    entry.runtime_data = Ppe4RuntimeData(api=api, coordinator=coordinator)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
     return True
@@ -155,7 +164,4 @@ async def async_setup(hass: HomeAssistant, config) -> bool:
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    unload = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
-    if unload:
-        hass.data[DOMAIN].pop(entry.entry_id)
-    return unload
+    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)

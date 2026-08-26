@@ -39,7 +39,8 @@
       "energy_month": "Energy (month)",
       "water_today": "Water (today)",
       "water_month": "Water (month)",
-      "mode": "Operating mode"
+      "mode": "Operating mode",
+      "status": "Status"
     },
     "binary_sensor": {
       "fault": "Fault"

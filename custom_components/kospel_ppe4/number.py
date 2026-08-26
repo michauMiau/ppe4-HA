@@ -21,9 +21,8 @@ _LOGGER = logging.getLogger(__name__)
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    data = hass.data[DOMAIN][entry.entry_id]
-    coordinator = data["coordinator"]
-    api = data["api"]
+    coordinator = entry.runtime_data.coordinator
+    api = entry.runtime_data.api
     async_add_entities([
         Ppe4TargetTemp(coordinator, api, entry),
         Ppe4Profile(coordinator, api, entry, 1391, "profile_1"),
@@ -39,7 +38,7 @@ class _Ppe4BaseNumber(Ppe4Entity, NumberEntity):
 
     def __init__(self, coordinator, api, entry: ConfigEntry,
                  register: int, key: str) -> None:
-        super().__init__(coordinator, entry)
+        super().__init__(coordinator, entry, key)
         self._api = api
         self._register = register
         self._attr_translation_key = key

@@ -39,7 +39,8 @@
       "energy_month": "Energia (miesiąc)",
       "water_today": "Woda (dziś)",
       "water_month": "Woda (miesiąc)",
-      "mode": "Tryb pracy"
+      "mode": "Tryb pracy",
+      "status": "Status"
     },
     "binary_sensor": {
       "fault": "Usterka"

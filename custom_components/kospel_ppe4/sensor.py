@@ -15,6 +15,8 @@ from homeassistant.const import (
     UnitOfVolumeFlowRate,
 )
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.device_registry import DeviceEntryType
+from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -24,8 +26,7 @@ from .const import DOMAIN
 async def async_setup_entry(
     hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddEntitiesCallback
 ) -> None:
-    data = hass.data[DOMAIN][entry.entry_id]
-    coordinator = data["coordinator"]
+    coordinator = entry.runtime_data.coordinator
     async_add_entities([
         Ppe4Sensor(coordinator, entry, 1134, "temp_in", UnitOfTemperature.CELSIUS,
                    SensorDeviceClass.TEMPERATURE, 0.1),
@@ -41,20 +42,22 @@ async def async_setup_entry(
         # Energy meter for the Energy Dashboard (register 1520 = month kWh ×1000)
         Ppe4Sensor(coordinator, entry, 1520, "energy_month", UnitOfEnergy.KILO_WATT_HOUR,
                    SensorDeviceClass.ENERGY, 0.001, state_class=SensorStateClass.TOTAL_INCREASING),
-        # Water: today (1578, ×0.1 l) and this month (1644/1645 pair handled in coordinator merge)
+        # Water: today (1578, ×0.1 l) and this month (1644/1645 pair handled below)
         Ppe4Sensor(coordinator, entry, 1578, "water_today", UnitOfVolume.LITERS,
                    SensorDeviceClass.WATER, 0.1, state_class=SensorStateClass.TOTAL_INCREASING),
         Ppe4WaterMonth(coordinator, entry),
         Ppe4ModeSensor(coordinator, entry),
+        Ppe4StatusSensor(coordinator, entry),
     ])
 
 
 class Ppe4Entity(CoordinatorEntity):
     _attr_has_entity_name = True
 
-    def __init__(self, coordinator, entry: ConfigEntry) -> None:
+    def __init__(self, coordinator, entry: ConfigEntry, suffix: str) -> None:
         super().__init__(coordinator)
         self._entry = entry
+        self._attr_unique_id = f"{entry.entry_id}_{suffix}"
 
     @property
     def device_info(self):
@@ -63,13 +66,14 @@ class Ppe4Entity(CoordinatorEntity):
             "name": "KOSPEL PPE4",
             "manufacturer": "KOSPEL",
             "model": "PPE4",
+            "entry_type": DeviceEntryType.SERVICE,
         }
 
 
 class Ppe4Sensor(Ppe4Entity, SensorEntity):
     def __init__(self, coordinator, entry, register: int, key: str, unit,
                  device_class, scale: float, state_class=None) -> None:
-        super().__init__(coordinator, entry)
+        super().__init__(coordinator, entry, key)
         self._register = register
         self._attr_translation_key = key
         self._attr_native_unit_of_measurement = unit
@@ -92,12 +96,15 @@ class Ppe4Sensor(Ppe4Entity, SensorEntity):
 
 
 class Ppe4WaterMonth(Ppe4Entity, SensorEntity):
-    """32-bit water-month counter from register pair 1644/1645 (×0.01 l)."""
+    """32-bit water-month counter from register pair 1644/1645 (÷100 l)."""
 
     _attr_translation_key = "water_month"
     _attr_native_unit_of_measurement = UnitOfVolume.LITERS
     _attr_device_class = SensorDeviceClass.WATER
     _attr_state_class = SensorStateClass.TOTAL_INCREASING
+
+    def __init__(self, coordinator, entry: ConfigEntry) -> None:
+        super().__init__(coordinator, entry, "water_month")
 
     @property
     def native_value(self):
@@ -114,7 +121,26 @@ class Ppe4ModeSensor(Ppe4Entity, SensorEntity):
     _attr_translation_key = "mode"
     _MODES = {0: "profile", 1: "manual"}
 
+    def __init__(self, coordinator, entry: ConfigEntry) -> None:
+        super().__init__(coordinator, entry, "mode")
+
     @property
     def native_value(self) -> str | None:
         raw = self.coordinator.data.get(1390)
         return None if raw is None else self._MODES.get(raw, str(raw))
+
+
+class Ppe4StatusSensor(Ppe4Entity, SensorEntity):
+    """Raw status word (register 1129): 0=off, 1=idle/normal, 5=heating/pairing."""
+
+    _attr_translation_key = "status"
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _STATES = {0: "off", 1: "idle", 5: "heating"}
+
+    def __init__(self, coordinator, entry: ConfigEntry) -> None:
+        super().__init__(coordinator, entry, "status")
+
+    @property
+    def native_value(self) -> str | None:
+        raw = self.coordinator.data.get(1129)
+        return None if raw is None else self._STATES.get(raw, str(raw))
