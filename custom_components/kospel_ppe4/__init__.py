@@ -135,37 +135,14 @@ async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
 
 
-@callback
-async def _discovery_scan(hass: HomeAssistant) -> None:
-    """One background scan; starts a discovery flow for each new heater."""
-    from .config_flow import async_discover_heaters
-
-    for host in await async_discover_heaters(hass):
-        # skip already-configured heaters
-        if any(
-            e.data.get(CONF_HOST) == host
-            for e in hass.config_entries.async_entries(DOMAIN)
-        ):
-            continue
-        hass.async_create_task(
-            hass.config_entries.flow.async_init(
-                DOMAIN,
-                context={"source": SOURCE_DISCOVERY},
-                data={"host": host},
-            )
-        )
+# NOTE: Auto-discovery (network scan every 10 min) was removed — KOSPEL PPE4
+# heaters don't implement mDNS/zeroconf; manual IP entry via config flow is
+# the supported setup path. To re-enable, see git history tag v0.8.6.
 
 
 async def async_setup(hass: HomeAssistant, config) -> bool:
-    """Run a discovery scan shortly after HA start, then every 10 minutes."""
-    from homeassistant.helpers.event import async_track_time_interval
-
-    def _schedule(now=None) -> None:  # noqa: ARG001 - time callback signature
-        hass.async_create_task(_discovery_scan(hass))
-
-    hass.loop.call_soon_threadsafe(_schedule)
-    async_track_time_interval(hass, _schedule, _dt.timedelta(minutes=10))
-    _LOGGER.info("KOSPEL PPE4 discovery scheduled every 10 min")
+    """Integration setup entry point."""
+    _LOGGER.debug("KOSPEL PPE4 loaded (no auto-discovery)")
     return True
 
 

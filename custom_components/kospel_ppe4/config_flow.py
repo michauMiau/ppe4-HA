@@ -1,8 +1,6 @@
 """Config flow for KOSPEL PPE4.
 
-Discovery runs automatically in the background and any found heater shows up
-as a discovered entry ("Discovered! Click to configure") without user input.
-The manual form is a plain IP field only.
+Manual IP entry only — KOSPEL PPE4 heaters don't implement mDNS/zeroconf.
 """
 from __future__ import annotations
 
@@ -36,19 +34,8 @@ async def _check_host(session, host: str) -> bool:
         return False
 
 
-async def async_discover_heaters(hass) -> list[str]:
-    """Background network scan used by the discovery scheduler."""
-    from .discovery import discover
-
-    try:
-        found = await discover(hass)
-        return list(found)
-    except Exception:  # noqa: BLE001 - discovery must never break setup
-        return []
-
-
 class KospelPpe4ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
-    """Handle both automatic discovery and manual IP setup."""
+    """Handle manual IP setup from 'Add Integration'."""
 
     VERSION = 1
 
@@ -58,27 +45,9 @@ class KospelPpe4ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
-        from .options_flow import KospelPpe4OptionsFlow  # noqa: PLC0415 - avoids circular import
+        from .options_flow import KospelPpe4OptionsFlow  # noqa: PLC0415
         return KospelPpe4OptionsFlow(config_entry)
 
-    # ---- automatic discovery -------------------------------------------------
-    async def async_step_discovery(self, discovery_info) -> Any:
-        """Entry point when the background scanner finds a heater."""
-        host = discovery_info["host"]
-        await self.async_set_unique_id(f"{DOMAIN}_{host}")
-        self._abort_if_unique_id_configured()
-        self._host = host
-        return await self.async_step_confirm()
-
-    async def async_step_confirm(self, user_input=None) -> Any:
-        if user_input is not None:
-            return self.async_create_entry(
-                title=f"KOSPEL PPE4 ({self._host})", data={CONF_HOST: self._host}
-            )
-        self._set_confirm_only()
-        return self.async_show_form(step_id="confirm")
-
-    # ---- manual setup from "Add Integration" ---------------------------------
     async def async_step_user(self, user_input: dict[str, Any] | None = None):
         errors: dict[str, str] = {}
         host = None
