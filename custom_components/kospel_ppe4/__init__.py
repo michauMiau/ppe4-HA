@@ -73,7 +73,7 @@ class Ppe4Coordinator(DataUpdateCoordinator[dict[int, int]]):
 
     # (start, count) blocks we care about — max 48 registers per request
     LIVE_BLOCKS = ((1128, 25),)
-    SLOW_BLOCKS = ((1000, 44), (1390, 6), (1520, 48), (1576, 48), (1624, 26))
+    SLOW_BLOCKS = ((1000, 44), (1388, 8), (1390, 6), (1520, 48), (1576, 48), (1624, 26))
 
     def __init__(self, hass: HomeAssistant, api: Ppe4Api, scan_interval: int = 5) -> None:
         super().__init__(

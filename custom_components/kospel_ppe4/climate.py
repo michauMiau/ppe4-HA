@@ -1,8 +1,7 @@
 """Climate (thermostat) entity for KOSPEL PPE4.
 
-Target temperature register 1140 (×0.1 °C), writable only in manual mode
-(1390=1) — switching to manual happens automatically on temperature change.
-Current temperature = outlet (register 1135).
+Register 1388 is the master setpoint (×0.1 °C): writing it propagates to
+register 1140 and the active profile. Current temperature = outlet (1135).
 """
 from __future__ import annotations
 
@@ -44,7 +43,7 @@ class Ppe4Climate(Ppe4Entity, ClimateEntity):
     _attr_min_temp = MIN_TEMP
     _attr_max_temp = MAX_TEMP
     _attr_target_temperature_step = 1.0
-    _attr_hvac_modes = [HVACMode.HEAT, HVACMode.OFF]
+    _attr_hvac_modes = [HVACMode.HEAT]
     _attr_supported_features = ClimateEntityFeature.TARGET_TEMPERATURE
 
     def __init__(self, coordinator, api, entry: ConfigEntry) -> None:
@@ -58,12 +57,14 @@ class Ppe4Climate(Ppe4Entity, ClimateEntity):
 
     @property
     def target_temperature(self) -> float | None:
-        raw = self.coordinator.data.get(1140)
+        raw = self.coordinator.data.get(1388)
+        if raw is None:
+            raw = self.coordinator.data.get(1140)
         return None if raw is None else raw / 10
 
     @property
     def hvac_mode(self) -> HVACMode:
-        # heater always heats when water flows; OFF not really supported by device
+        # single fixed mode: the device has no real on/off via API
         return HVACMode.HEAT
 
     @property
@@ -72,9 +73,7 @@ class Ppe4Climate(Ppe4Entity, ClimateEntity):
         # status register alone (1129=5) also shows during WiFi pairing.
         flow = self.coordinator.data.get(1137, 0)
         power = self.coordinator.data.get(1138, 0)
-        if power > 0:
-            return HVACAction.HEATING
-        if flow > 0:
+        if power > 0 or flow > 0:
             return HVACAction.HEATING
         return HVACAction.IDLE
 
@@ -83,12 +82,7 @@ class Ppe4Climate(Ppe4Entity, ClimateEntity):
         if temp is None:
             return
         temp = min(max(float(temp), MIN_TEMP), MAX_TEMP)
-        await self._api.write(1390, 1)  # manual mode required for setpoint writes
-        await self._api.write(1140, int(round(temp * 10)))
+        # Register 1388 is the master setpoint — the device propagates it
+        # to 1140 and the active profile automatically.
+        await self._api.write(1388, int(round(temp * 10)))
         await self.coordinator.async_request_refresh()
-
-    async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
-        # device has no real on/off via API; keep profile mode when "off"
-        if hvac_mode == HVACMode.OFF:
-            await self._api.write(1390, 0)  # back to profile
-            await self.coordinator.async_request_refresh()
