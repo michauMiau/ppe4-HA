@@ -87,6 +87,11 @@
       "profile_3": {
         "name": "Profile 3 temperature"
       }
+    },
+    "select": {
+      "profile": {
+        "name": "Active profile"
+      }
     }
   }
 }
