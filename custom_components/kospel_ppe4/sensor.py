@@ -34,7 +34,7 @@ async def async_setup_entry(
                    SensorDeviceClass.TEMPERATURE, 0.1),
         # Live flow and power (non-zero only while heating)
         Ppe4Sensor(coordinator, entry, 1137, "flow", UnitOfVolumeFlowRate.LITERS_PER_MINUTE,
-                   None, 0.1, state_class=SensorStateClass.MEASUREMENT),
+                   SensorDeviceClass.VOLUME_FLOW_RATE, 0.1, state_class=SensorStateClass.MEASUREMENT),
         Ppe4Sensor(coordinator, entry, 1138, "power_current", UnitOfPower.KILO_WATT,
                    SensorDeviceClass.POWER, 0.001, state_class=SensorStateClass.MEASUREMENT),
         # Energy meter for the Energy Dashboard (register 1520 = month kWh ×1000)

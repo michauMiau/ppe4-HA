@@ -1,7 +1,8 @@
 """Climate (thermostat) entity for KOSPEL PPE4.
 
-Register 1388 is the master setpoint (×0.1 °C): writing it propagates to
-register 1140 and the active profile. Current temperature = outlet (1135).
+Register 1388 is the master setpoint (×0.1 °C). Writing it sets the target in
+the currently active profile (selected via sensor 1389 / profile select).
+Current temperature = outlet (register 1135).
 """
 from __future__ import annotations
 
@@ -83,6 +84,6 @@ class Ppe4Climate(Ppe4Entity, ClimateEntity):
             return
         temp = min(max(float(temp), MIN_TEMP), MAX_TEMP)
         # Register 1388 is the master setpoint — the device propagates it
-        # to 1140 and the active profile automatically.
+        # only to the currently active profile (select entity 1389), not all.
         await self._api.write(1388, int(round(temp * 10)))
         await self.coordinator.async_request_refresh()
