@@ -9,7 +9,7 @@ from dataclasses import dataclass
 
 import aiohttp
 
-from homeassistant.config_entries import ConfigEntry
+from homeassistant.config_entries import SOURCE_DISCOVERY, ConfigEntry
 from homeassistant.const import CONF_HOST, Platform
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
@@ -144,7 +144,7 @@ async def _discovery_scan(hass: HomeAssistant) -> None:
         hass.async_create_task(
             hass.config_entries.flow.async_init(
                 DOMAIN,
-                context={"source": config_entries.SOURCE_DISCOVERY},
+                context={"source": SOURCE_DISCOVERY},
                 data={"host": host},
             )
         )
@@ -154,7 +154,7 @@ async def async_setup(hass: HomeAssistant, config) -> bool:
     """Run a discovery scan shortly after HA start, then every 10 minutes."""
     from homeassistant.helpers.event import async_track_time_interval
 
-    def _schedule(now=None) -> None:
+    def _schedule(now=None) -> None:  # noqa: ARG001 - time callback signature
         hass.async_create_task(_discovery_scan(hass))
 
     hass.loop.call_soon_threadsafe(_schedule)

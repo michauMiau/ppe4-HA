@@ -6,10 +6,14 @@ disable=
     invalid-name,
     import-error,
     too-few-public-methods,
-    no-member
+    no-member,
+    unused-argument,
+    broad-exception-caught,
+    import-outside-toplevel,
+    too-many-positional-arguments
 
 [FORMAT]
 max-line-length=120
 
 [DESIGN]
-max-arguments=6
+max-args=8

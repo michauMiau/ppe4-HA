@@ -71,8 +71,10 @@ class Ppe4Entity(CoordinatorEntity):
 
 
 class Ppe4Sensor(Ppe4Entity, SensorEntity):
+    """Generic register-backed sensor."""
+
     def __init__(self, coordinator, entry, register: int, key: str, unit,
-                 device_class, scale: float, state_class=None) -> None:
+                 device_class, scale: float, state_class=None) -> None:  # noqa: PLR0913 - explicit config
         super().__init__(coordinator, entry, key)
         self._register = register
         self._attr_translation_key = key

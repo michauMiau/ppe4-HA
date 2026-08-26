@@ -8,8 +8,6 @@ import voluptuous as vol
 from homeassistant import config_entries
 from homeassistant.const import CONF_HOST
 
-from .const import DOMAIN
-
 OPTIONS_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_HOST): str,

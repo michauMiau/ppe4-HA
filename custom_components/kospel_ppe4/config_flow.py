@@ -13,7 +13,7 @@ import voluptuous as vol
 
 from homeassistant import config_entries
 from homeassistant.const import CONF_HOST
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .const import DOMAIN
@@ -32,28 +32,18 @@ async def _check_host(session, host: str) -> bool:
         async with session.get(f"http://{host}/api/1390/1", timeout=8) as resp:
             data = await resp.json(content_type=None)
             return isinstance(data, dict) and data.get("status") == "OK"
-    except Exception:  # noqa: BLE001
+    except Exception:  # noqa: BLE001 - any network/parse error means unreachable
         return False
 
 
-async def _validate_and_create(hass: HomeAssistant, flow, host: str):
-    """Shared validation + entry creation for both flows."""
-    session = async_get_clientsession(hass)
-    if not await _check_host(session, host):
-        raise CannotConnect
-    await flow.async_set_unique_id(f"{DOMAIN}_{host}")
-    flow._abort_if_unique_id_configured()
-    return flow.async_create_entry(title=f"KOSPEL PPE4 ({host})", data={CONF_HOST: host})
-
-
 async def async_discover_heaters(hass) -> list[str]:
-    """Background network scan used by the discovery coordinator."""
+    """Background network scan used by the discovery scheduler."""
     from .discovery import discover
 
     try:
         found = await discover(hass)
         return list(found)
-    except Exception:  # noqa: BLE001
+    except Exception:  # noqa: BLE001 - discovery must never break setup
         return []
 
 
@@ -68,7 +58,7 @@ class KospelPpe4ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @staticmethod
     @callback
     def async_get_options_flow(config_entry):
-        from .options_flow import KospelPpe4OptionsFlow
+        from .options_flow import KospelPpe4OptionsFlow  # noqa: PLC0415 - avoids circular import
         return KospelPpe4OptionsFlow(config_entry)
 
     # ---- automatic discovery -------------------------------------------------
@@ -94,13 +84,16 @@ class KospelPpe4ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         host = None
         if user_input is not None:
             host = str(user_input[CONF_HOST]).strip()
-            try:
-                return await _validate_and_create(self.hass, self, host)
-            except CannotConnect:
-                errors["base"] = "cannot_connect"
+            session = async_get_clientsession(self.hass)
+            if await _check_host(session, host):
+                await self.async_set_unique_id(f"{DOMAIN}_{host}")
+                self._abort_if_unique_id_configured()
+                return self.async_create_entry(
+                    title=f"KOSPEL PPE4 ({host})", data={CONF_HOST: host}
+                )
+            errors["base"] = "cannot_connect"
         return self.async_show_form(
             step_id="user",
             data_schema=STEP_DATA_SCHEMA,
             errors=errors,
         )
-
