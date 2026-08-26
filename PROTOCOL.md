@@ -1,21 +1,25 @@
 # KOSPEL PPE4 — protokół HTTP (potwierdzony na żywo, piec 192.168.1.94)
 
 ## Ogólne
+
 - REST JSON, User-Agent aplikacji: `KOSPEL RESTClient/1.0`
 - Odpowiedź: `{"ver":"1.0","status":"OK","status_value":"0","res":{"<rejestr>":<wartość>,...}}`
 - Rejestry = MODBUS-like adresy 16-bit; statystyki są 32-bit (para rejestrów lo/hi: 1520/1521 itd.)
 - Urządzenie ma też stronę konfiguracji WiFi pod `http://<ip>/` (AP `ppe4_0000xxxx`, hasło domyślne `12345678`, config AP: 192.168.8.1)
 
 ## Odczyt
+
 `GET http://<ip>/api/<start>/<count>` → res z rejestrami start..start+count-1
 
 ## Zapis
+
 `POST /api/write`, **Content-Type: application/json**, body = `{"<rejestr>":<wartość>}`
 (form-urlencoded NIE działa — błąd -10). Zapis nieistniejącego rejestru zwraca OK ale nic nie robi.
 
 ## Mapowanie rejestrów (potwierdzone na żywym urządzeniu)
+
 | Rejestr | Znaczenie | Skala |
-|---|---|---|
+| --- | --- | --- |
 | 1129 | flaga statusu (5=parowanie?, 1=normalny) | — |
 | 1134 / 1135 | Tin / Tout (temperatura wejścia/wyjścia) | ×0.1 °C |
 | 1137 | przepływ (tylko podczas poboru wody) | ×0.1 l/min |
@@ -32,6 +36,7 @@
 | 1644/1645 | woda — miesiąc (para 32-bit) | ÷100 l |
 
 ## Błędy
+
 - `-10`: niedozwolony znak (zły content-type/format)
 - `-11`: zły adres startowy
 - `-14`: zła liczba rejestrów

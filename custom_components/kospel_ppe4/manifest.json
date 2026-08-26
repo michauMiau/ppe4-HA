@@ -1,11 +1,11 @@
 {
   "domain": "kospel_ppe4",
   "name": "KOSPEL PPE4",
-  "codeowners": ["@michauMiau", "@garfi-kod"],
+  "codeowners": ["@michauMiau"],
   "config_flow": true,
   "documentation": "https://github.com/michauMiau/ppe4-HA",
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/michauMiau/ppe4-HA/issues",
   "requirements": [],
-  "version": "0.4.2"
+  "version": "0.8.6"
 }

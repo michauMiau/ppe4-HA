@@ -2,12 +2,10 @@
 ignore-patterns=test_.*?py
 disable=
     missing-function-docstring,
-    missing-class-docstring,
-    invalid-name,
     import-error,
     too-few-public-methods,
-    no-member,
-    unused-argument,
+    no-member,u
+    unused-argment,
     broad-exception-caught,
     import-outside-toplevel,
     too-many-positional-arguments
