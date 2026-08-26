@@ -29,9 +29,9 @@ async def async_setup_entry(
     coordinator = entry.runtime_data.coordinator
     async_add_entities([
         Ppe4Sensor(coordinator, entry, 1134, "temp_in", UnitOfTemperature.CELSIUS,
-                   SensorDeviceClass.TEMPERATURE, 0.1),
+                   SensorDeviceClass.TEMPERATURE, 0.1, state_class=SensorStateClass.MEASUREMENT),
         Ppe4Sensor(coordinator, entry, 1135, "temp_out", UnitOfTemperature.CELSIUS,
-                   SensorDeviceClass.TEMPERATURE, 0.1),
+                   SensorDeviceClass.TEMPERATURE, 0.1, state_class=SensorStateClass.MEASUREMENT),
         # Live flow and power (non-zero only while heating)
         Ppe4Sensor(coordinator, entry, 1137, "flow", UnitOfVolumeFlowRate.LITERS_PER_MINUTE,
                    SensorDeviceClass.VOLUME_FLOW_RATE, 0.1, state_class=SensorStateClass.MEASUREMENT),
