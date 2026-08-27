@@ -8,12 +8,14 @@ import time
 from dataclasses import dataclass
 
 import aiohttp
+import voluptuous as vol
 
-from homeassistant.config_entries import SOURCE_DISCOVERY, ConfigEntry
+from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, Platform
-from homeassistant.core import HomeAssistant, callback
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.helpers import config_validation as cv
 
 from .const import DOMAIN
 
@@ -28,6 +30,8 @@ PLATFORMS: list[Platform] = [
 ]
 
 SCAN_INTERVAL = 30
+
+CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
 
 @dataclass
@@ -131,20 +135,8 @@ async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> Non
     await hass.config_entries.async_reload(entry.entry_id)
 
 
+# NOTE: Auto-discovery was removed — KOSPEL PPE4 heaters don't implement mDNS/zeroconf.
+# Manual IP entry via config flow is the only setup path.
+
 async def async_migrate_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     return True
-
-
-# NOTE: Auto-discovery (network scan every 10 min) was removed — KOSPEL PPE4
-# heaters don't implement mDNS/zeroconf; manual IP entry via config flow is
-# the supported setup path. To re-enable, see git history tag v0.8.6.
-
-
-async def async_setup(hass: HomeAssistant, config) -> bool:
-    """Integration setup entry point."""
-    _LOGGER.debug("KOSPEL PPE4 loaded (no auto-discovery)")
-    return True
-
-
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
