@@ -1,5 +1,5 @@
 # ppe4-HA
-[brand img](brand/icon.png)
+[![brand img](brand/icon.png)]
 Integration for the KOSPEL PPE4 Water heater in Home Assistant.
 
 ## Features
