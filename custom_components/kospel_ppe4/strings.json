@@ -33,11 +33,7 @@
     "climate": {
       "thermostat": {
         "name": "Thermostat",
-        "state_attributes": {
-          "target_temp_step": {
-            "default": 1
-          }
-        }
+        "state_attributes": {}
       }
     },
     "sensor": {
