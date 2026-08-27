@@ -83,7 +83,10 @@ class Ppe4Climate(Ppe4Entity, ClimateEntity):
         if temp is None:
             return
         temp = min(max(float(temp), MIN_TEMP), MAX_TEMP)
-        # Register 1388 is the master setpoint — the device propagates it
-        # only to the currently active profile (select entity 1389), not all.
+        # Register 1388 is the master setpoint — propagates only to the
+        # currently active profile (select entity 1389), not all profiles.
         await self._api.write(1388, int(round(temp * 10)))
+        # Optimistic: immediately reflect the new setpoint in HA's cache so
+        # the UI doesn't lag behind the physical heater's ramp.
         await self.coordinator.async_request_refresh()
+        self.async_write_ha_state()
