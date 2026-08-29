@@ -18,7 +18,7 @@ async def async_setup_entry(
 
 
 class Ppe4ProfileSelect(Ppe4Entity, SelectEntity):
-    """Active comfort profile selector — register 1389 (1..3).
+    """Active comfort profile selector — register 1389 (1..5).
 
     Verified live: writing 1389 switches the active profile and the device
     updates register 1140 (effective setpoint) to that profile's temperature.
@@ -26,7 +26,7 @@ class Ppe4ProfileSelect(Ppe4Entity, SelectEntity):
 
     _attr_translation_key = "profile"
     _attr_icon = "mdi:tune-variant"
-    _attr_options = ["Profil 1", "Profil 2", "Profil 3"]
+    _attr_options = [f"Profil {n}" for n in range(1, 6)]
 
     def __init__(self, coordinator, api, entry: ConfigEntry) -> None:
         super().__init__(coordinator, entry, "profile")
@@ -35,7 +35,7 @@ class Ppe4ProfileSelect(Ppe4Entity, SelectEntity):
     @property
     def current_option(self) -> str | None:
         raw = self.coordinator.data.get(1389)
-        if raw in (1, 2, 3):
+        if raw in range(1, 6):
             return f"Profil {raw}"
         return None
 

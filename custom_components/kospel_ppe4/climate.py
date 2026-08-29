@@ -1,7 +1,11 @@
 """Climate (thermostat) entity for KOSPEL PPE4.
 
-Register 1388 is the master setpoint (×0.1 °C). Writing it sets the target in
-the currently active profile (selected via sensor 1389 / profile select).
+Temperature follows the ACTIVE PROFILE: register 1389 holds the profile
+number (1..5), and each profile has its own setpoint register 1390+profile
+(×0.1 °C). Writing the master setpoint 1388 is ignored in profile mode, so
+the thermostat reads the active profile and writes its register directly.
+Verified live: writing the active profile's register updates the effective
+setpoint (register 1140) immediately.
 Current temperature = outlet (register 1135).
 """
 from __future__ import annotations
@@ -58,9 +62,14 @@ class Ppe4Climate(Ppe4Entity, ClimateEntity):
 
     @property
     def target_temperature(self) -> float | None:
-        raw = self.coordinator.data.get(1388)
+        d = self.coordinator.data or {}
+        profile = d.get(1389)
+        if profile is not None and 1 <= profile <= 5:
+            raw = d.get(1390 + profile)
+        else:
+            raw = None
         if raw is None:
-            raw = self.coordinator.data.get(1140)
+            raw = d.get(1140)  # effective setpoint (mirrors active profile)
         return None if raw is None else raw / 10
 
     @property
@@ -83,9 +92,16 @@ class Ppe4Climate(Ppe4Entity, ClimateEntity):
         if temp is None:
             return
         temp = min(max(float(temp), MIN_TEMP), MAX_TEMP)
-        # Register 1388 is the master setpoint — propagates only to the
-        # currently active profile (select entity 1389), not all profiles.
-        await self._api.write(1388, int(round(temp * 10)))
+        d = self.coordinator.data or {}
+        profile = d.get(1389)
+        if profile is not None and 1 <= profile <= 5:
+            # Write the active profile's own setpoint register (1390+profile).
+            # The master setpoint 1388 is ignored by the device in profile mode.
+            register = 1390 + profile
+        else:
+            # Fallback: no known profile — use the master setpoint.
+            register = 1388
+        await self._api.write(register, int(round(temp * 10)))
         # Optimistic: immediately reflect the new setpoint in HA's cache so
         # the UI doesn't lag behind the physical heater's ramp.
         await self.coordinator.async_request_refresh()

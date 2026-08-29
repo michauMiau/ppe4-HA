@@ -82,6 +82,12 @@
       },
       "profile_3": {
         "name": "Profile 3 temperature"
+      },
+      "profile_4": {
+        "name": "Profile 4 temperature"
+      },
+      "profile_5": {
+        "name": "Profile 5 temperature"
       }
     },
     "select": {
