@@ -1,11 +1,11 @@
 """Climate (thermostat) entity for KOSPEL PPE4.
 
 Temperature follows the ACTIVE PROFILE: register 1389 holds the profile
-number (1..5), and each profile has its own setpoint register 1390+profile
-(×0.1 °C). Writing the master setpoint 1388 is ignored in profile mode, so
-the thermostat reads the active profile and writes its register directly.
-Verified live: writing the active profile's register updates the effective
-setpoint (register 1140) immediately.
+number (1..3), and each profile has its own setpoint register 1390+profile
+(×0.1 °C). Writing the master setpoint 1388 is ignored by the device in
+profile mode, so the thermostat reads the active profile and writes its
+register directly. Verified live: writing the active profile's register
+updates the effective setpoint (register 1140) immediately.
 Current temperature = outlet (register 1135).
 """
 from __future__ import annotations
@@ -64,7 +64,7 @@ class Ppe4Climate(Ppe4Entity, ClimateEntity):
     def target_temperature(self) -> float | None:
         d = self.coordinator.data or {}
         profile = d.get(1389)
-        if profile is not None and 1 <= profile <= 5:
+        if profile is not None and 1 <= profile <= 3:
             raw = d.get(1390 + profile)
         else:
             raw = None
@@ -94,7 +94,7 @@ class Ppe4Climate(Ppe4Entity, ClimateEntity):
         temp = min(max(float(temp), MIN_TEMP), MAX_TEMP)
         d = self.coordinator.data or {}
         profile = d.get(1389)
-        if profile is not None and 1 <= profile <= 5:
+        if profile is not None and 1 <= profile <= 3:
             # Write the active profile's own setpoint register (1390+profile).
             # The master setpoint 1388 is ignored by the device in profile mode.
             register = 1390 + profile

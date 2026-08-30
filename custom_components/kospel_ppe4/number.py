@@ -1,6 +1,6 @@
-"""Number entities for KOSPEL PPE4 — the five temperature profiles.
+"""Number entities for KOSPEL PPE4 — the three temperature profiles.
 
-Profiles: registers 1391..1395 (×0.1 °C), limits read from 1008/1009.
+Profiles: registers 1391/1392/1393 (×0.1 °C), limits read from 1008/1009.
 The setpoint itself is exposed as a climate (thermostat) entity — see climate.py.
 """
 from __future__ import annotations
@@ -23,13 +23,14 @@ async def async_setup_entry(
     coordinator = entry.runtime_data.coordinator
     api = entry.runtime_data.api
     async_add_entities([
-        Ppe4Profile(coordinator, api, entry, register, f"profile_{register - 1390}")
-        for register in range(1391, 1396)
+        Ppe4Profile(coordinator, api, entry, 1391, "profile_1"),
+        Ppe4Profile(coordinator, api, entry, 1392, "profile_2"),
+        Ppe4Profile(coordinator, api, entry, 1393, "profile_3"),
     ])
 
 
 class Ppe4Profile(Ppe4Entity, NumberEntity):
-    """One of the five temperature profiles (registers 1391..1395)."""
+    """One of the three temperature profiles (registers 1391..1393)."""
 
     _attr_mode = None  # auto: box
     _attr_native_step = 1.0
