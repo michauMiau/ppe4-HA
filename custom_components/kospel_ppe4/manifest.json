@@ -7,5 +7,5 @@
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/michauMiau/ppe4-HA/issues",
   "requirements": [],
-  "version": "0.9.1"
+  "version": "0.9.3"
 }
