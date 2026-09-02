@@ -99,25 +99,31 @@ class Ppe4Coordinator(DataUpdateCoordinator[dict[int, int]]):
         self._last_slow = 0.0
 
     async def _async_update_data(self) -> dict[int, int]:
-        merged: dict[int, int] = {}
-        try:
-            live = await asyncio.gather(*(self.api.read(s, c) for s, c in self.LIVE_BLOCKS))
-            now = time.monotonic()
-            if now - self._last_slow > SCAN_INTERVAL - 2:  # slow refresh due
-                blocks = self.SLOW_BLOCKS + self.WATER_MONTH_BLOCK
-                slow = await asyncio.gather(*(self.api.read(s, c) for s, c in blocks))
-                self._last_slow = now
-                for res in slow:
-                    merged.update(res)
-            else:
-                # reuse previous slow values
-                merged.update(self.data or {})
-        except UpdateFailed:
-            raise
-        except Exception as err:  # noqa: BLE001
-            raise UpdateFailed(str(err)) from err
-        for res in live:
+        now = time.monotonic()
+        slow_due = now - self._last_slow > SCAN_INTERVAL - 2
+        blocks = list(self.LIVE_BLOCKS)
+        if slow_due:
+            blocks += list(self.SLOW_BLOCKS + self.WATER_MONTH_BLOCK)
+
+        results = await asyncio.gather(
+            *(self.api.read(s, c) for s, c in blocks),
+            return_exceptions=True,
+        )
+
+        # Carry over previously read registers; successful reads overwrite.
+        # A single failed block must never take down the whole coordinator.
+        merged: dict[int, int] = dict(self.data or {})
+        ok = 0
+        for res in results:
+            if isinstance(res, BaseException):
+                _LOGGER.warning("PPE4 read failed: %s", res)
+                continue
+            assert isinstance(res, dict)
             merged.update(res)
+            ok += 1
+
+        if ok == 0:
+            raise UpdateFailed("all register reads failed")
         return merged
 
 
