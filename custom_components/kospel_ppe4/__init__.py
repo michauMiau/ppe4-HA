@@ -105,13 +105,15 @@ class Ppe4Coordinator(DataUpdateCoordinator[dict[int, int]]):
         if slow_due:
             blocks += list(self.SLOW_BLOCKS + self.WATER_MONTH_BLOCK)
 
+        # The device's HTTP server is flaky under load: a single dropped
+        # connection must never take down the whole coordinator, otherwise
+        # every entity goes unavailable (and setup fails on first refresh).
         results = await asyncio.gather(
             *(self.api.read(s, c) for s, c in blocks),
             return_exceptions=True,
         )
 
         # Carry over previously read registers; successful reads overwrite.
-        # A single failed block must never take down the whole coordinator.
         merged: dict[int, int] = dict(self.data or {})
         ok = 0
         for res in results:
@@ -124,6 +126,8 @@ class Ppe4Coordinator(DataUpdateCoordinator[dict[int, int]]):
 
         if ok == 0:
             raise UpdateFailed("all register reads failed")
+        if slow_due:
+            self._last_slow = now
         return merged
 
 
