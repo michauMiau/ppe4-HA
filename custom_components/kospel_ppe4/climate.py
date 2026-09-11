@@ -95,14 +95,12 @@ class Ppe4Climate(Ppe4Entity, ClimateEntity):
         d = self.coordinator.data or {}
         profile = d.get(1389)
         if profile is not None and 1 <= profile <= 3:
-            # Write the active profile's own setpoint register (1390+profile).
-            # The master setpoint 1388 is ignored by the device in profile mode.
             register = 1390 + profile
         else:
-            # Fallback: no known profile — use the master setpoint.
             register = 1388
-        await self._api.write(register, int(round(temp * 10)))
-        # Optimistic: immediately reflect the new setpoint in HA's cache so
-        # the UI doesn't lag behind the physical heater's ramp.
-        await self.coordinator.async_request_refresh()
+        value = int(round(temp * 10))
+        await self._api.write(register, value)
+        if self.coordinator.data is None:
+            self.coordinator.data = {}
+        self.coordinator.data[register] = value
         self.async_write_ha_state()

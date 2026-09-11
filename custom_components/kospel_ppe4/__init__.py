@@ -83,10 +83,7 @@ class Ppe4Coordinator(DataUpdateCoordinator[dict[int, int]]):
 
     # (start, count) blocks we care about — max 48 registers per request
     LIVE_BLOCKS = ((1128, 25),)
-    SLOW_BLOCKS = ((1000, 44), (1388, 8), (1390, 6), (1510, 14), (1520, 48), (1576, 48))
-    # Water-month counter pair 1644/1645 sits just past SLOW_BLOCKS coverage;
-    # poll it explicitly so the water_month sensor is never "unavailable".
-    WATER_MONTH_BLOCK = ((1640, 8),)
+    SLOW_BLOCKS = ((1000, 44), (1388, 8), (1390, 6), (1510, 14), (1520, 48), (1576, 48), (1640, 8))
 
     def __init__(self, hass: HomeAssistant, api: Ppe4Api, scan_interval: int = 5) -> None:
         super().__init__(
@@ -103,7 +100,7 @@ class Ppe4Coordinator(DataUpdateCoordinator[dict[int, int]]):
         slow_due = now - self._last_slow > SCAN_INTERVAL - 2
         blocks = list(self.LIVE_BLOCKS)
         if slow_due:
-            blocks += list(self.SLOW_BLOCKS + self.WATER_MONTH_BLOCK)
+            blocks += list(self.SLOW_BLOCKS)
 
         # The device's HTTP server is flaky under load: a single dropped
         # connection must never take down the whole coordinator, otherwise
