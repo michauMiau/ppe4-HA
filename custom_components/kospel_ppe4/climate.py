@@ -12,6 +12,8 @@ from __future__ import annotations
 
 import logging
 
+import asyncio
+
 from homeassistant.components.climate import (
     ClimateEntity,
     ClimateEntityFeature,
@@ -100,6 +102,11 @@ class Ppe4Climate(Ppe4Entity, ClimateEntity):
             register = 1388
         value = int(round(temp * 10))
         await self._api.write(register, value)
+        # Small delay to let the device process the write before we
+        # update our local state. This prevents a race condition where
+        # the coordinator refreshes before the device has updated the
+        # register, causing the old value to overwrite our new one.
+        await asyncio.sleep(0.5)
         if self.coordinator.data is None:
             self.coordinator.data = {}
         self.coordinator.data[register] = value
