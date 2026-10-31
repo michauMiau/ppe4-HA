@@ -12,7 +12,7 @@ Integration for the KOSPEL PPE4 Water heater in Home Assistant.
 
 ### Marketplace (recommended)
 
-[![Open your Home Assistant instance and add the repository in Marketplace](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=michauMiau&repository=ppe4-HA&category=integration)
+[![Open your Home Assistant instance and add the repository in HACS](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=michauMiau&repository=ppe4-HA&category=integration)
 
 1. Click the badge above (or **Marketplace → ⋮ → Custom repositories**)
 2. Repository: `michauMiau/ppe4-HA`, category: **Integration**
