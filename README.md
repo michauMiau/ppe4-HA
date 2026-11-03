@@ -3,6 +3,7 @@
 Integration for the KOSPEL PPE4 Water heater in Home Assistant.
    </h2>
 </div>
+
 ## Features
 
 - **Sensors**: target temperature, min/max setpoints, limits, current power, operating mode
