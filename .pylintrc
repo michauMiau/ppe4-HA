@@ -4,6 +4,7 @@ disable=
     missing-function-docstring,
     missing-class-docstring,
     import-error,
+    invalid-name,
     too-few-public-methods,
     no-member,
     unused-argument,
