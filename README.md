@@ -4,6 +4,8 @@ Integration for the KOSPEL PPE4 Water heater in Home Assistant.
    </h2>
 </div>
 
+Also check out [KDE Connect for Home Assistant](https://github.com/michauMiau/kde-connect-ha), the sibling integration in this family.
+
 ## Features
 
 - **Sensors**: target temperature, min/max setpoints, limits, current power, operating mode
