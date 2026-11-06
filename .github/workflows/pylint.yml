@@ -1,7 +1,16 @@
 name: Pylint
 
-on: [push]
 
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'custom_components/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'custom_components/**'
+      
 jobs:
   build:
     runs-on: ubuntu-latest
