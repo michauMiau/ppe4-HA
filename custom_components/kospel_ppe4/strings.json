@@ -23,9 +23,11 @@
       "init": {
         "data": {
           "host": "IP address",
-          "scan_interval": "Live polling interval (seconds)"
+          "scan_interval": "Live polling interval (seconds)",
+          "flow_interval": "Polling interval while water is flowing (seconds)",
+          "stats_interval": "Statistics interval (seconds)"
         },
-        "description": "Live data (temperatures, flow, power) refreshes at this interval. Statistics update every 30 s regardless."
+        "description": "Live data (temperatures, flow, power) refreshes at the live interval, or at the flow interval while water is flowing if that is shorter. Statistics, profiles and limits refresh at the statistics interval."
       }
     }
   },
@@ -58,14 +60,23 @@
       "water_month": {
         "name": "Water used this month"
       },
-      "mode": {
-        "name": "Operating mode"
-      },
       "status": {
         "name": "Heater status"
       },
       "energy_today": {
         "name": "Energy used today"
+      },
+      "energy_total": {
+        "name": "Energy used in total"
+      },
+      "energy_year": {
+        "name": "Energy used this year"
+      },
+      "water_total": {
+        "name": "Water used in total"
+      },
+      "water_year": {
+        "name": "Water used this year"
       }
     },
     "binary_sensor": {
@@ -86,7 +97,13 @@
     },
     "select": {
       "profile": {
-        "name": "Active profile"
+        "name": "Active profile",
+        "state": {
+          "manual": "Manual",
+          "profile_1": "Profile 1",
+          "profile_2": "Profile 2",
+          "profile_3": "Profile 3"
+        }
       }
     }
   }

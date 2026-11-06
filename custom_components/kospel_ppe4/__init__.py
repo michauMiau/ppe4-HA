@@ -17,7 +17,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.helpers import config_validation as cv
 
-from .const import DOMAIN
+from .const import DEFAULT_FLOW_INTERVAL, DEFAULT_SCAN_INTERVAL, DEFAULT_STATS_INTERVAL, DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -28,8 +28,6 @@ PLATFORMS: list[Platform] = [
     Platform.CLIMATE,
     Platform.SELECT,
 ]
-
-SCAN_INTERVAL = 30
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 
@@ -48,10 +46,12 @@ class Ppe4Api:
     def __init__(self, host: str, session: aiohttp.ClientSession) -> None:
         self._host = host
         self._session = session
+        # The heater's HTTP server drops parallel connections: one request at a time.
+        self._lock = asyncio.Lock()
 
     async def read(self, start: int, count: int) -> dict[int, int]:
         url = f"http://{self._host}/api/{start}/{count}"
-        async with self._session.get(
+        async with self._lock, self._session.get(
             url, headers={"User-Agent": "KOSPEL RESTClient/1.0"}, timeout=aiohttp.ClientTimeout(total=10)
         ) as resp:
             resp.raise_for_status()
@@ -62,7 +62,7 @@ class Ppe4Api:
 
     async def write(self, register: int, value: int) -> None:
         url = f"http://{self._host}/api/write"
-        async with self._session.post(
+        async with self._lock, self._session.post(
             url,
             json={str(register): value},
             headers={"User-Agent": "KOSPEL RESTClient/1.0"},
@@ -77,15 +77,32 @@ class Ppe4Api:
 class Ppe4Coordinator(DataUpdateCoordinator[dict[int, int]]):
     """Poll the heater for all known registers.
 
-    Live block (1128+, temperatures/flow/power) is refreshed every 5 s to match
-    the official app; slow blocks (limits, profiles, statistics) every 30 s.
+    Live block (1128+, temperatures/flow/power) is refreshed at the live interval,
+    faster while water is flowing; slow blocks (limits, profiles, statistics) at
+    the statistics interval.
     """
 
-    # (start, count) blocks we care about — max 48 registers per request
+    # (start, count) blocks we care about — max 48 registers per request.
+    # Only ranges that exist on the device: a request touching an unmapped
+    # register (e.g. 1440-1447, 1568-1570) returns broken JSON.
     LIVE_BLOCKS = ((1128, 25),)
-    SLOW_BLOCKS = ((1000, 44), (1388, 8), (1390, 6), (1510, 14), (1520, 48), (1576, 48), (1640, 8))
+    SLOW_BLOCKS = (
+        (1000, 44),
+        (1388, 8),
+        (1448, 4),   # energy: today
+        (1512, 32),  # energy: 7 days, year, previous year, total, months
+        (1576, 4),   # water: today
+        (1640, 32),  # water: 7 days, year, previous year, total, months
+    )
 
-    def __init__(self, hass: HomeAssistant, api: Ppe4Api, scan_interval: int = 5) -> None:
+    def __init__(
+        self,
+        hass: HomeAssistant,
+        api: Ppe4Api,
+        scan_interval: int = DEFAULT_SCAN_INTERVAL,
+        flow_interval: int = DEFAULT_FLOW_INTERVAL,
+        stats_interval: int = DEFAULT_STATS_INTERVAL,
+    ) -> None:
         super().__init__(
             hass,
             _LOGGER,
@@ -93,11 +110,15 @@ class Ppe4Coordinator(DataUpdateCoordinator[dict[int, int]]):
             update_interval=_dt.timedelta(seconds=scan_interval),
         )
         self.api = api
+        self._idle_interval = _dt.timedelta(seconds=scan_interval)
+        # While water is flowing, poll faster so short draws show up in flow and power.
+        self._flow_interval = min(_dt.timedelta(seconds=flow_interval), self._idle_interval)
+        self._stats_interval = stats_interval
         self._last_slow = 0.0
 
     async def _async_update_data(self) -> dict[int, int]:
         now = time.monotonic()
-        slow_due = now - self._last_slow > SCAN_INTERVAL - 2
+        slow_due = now - self._last_slow > self._stats_interval - 2
         blocks = list(self.LIVE_BLOCKS)
         if slow_due:
             blocks += list(self.SLOW_BLOCKS)
@@ -105,10 +126,12 @@ class Ppe4Coordinator(DataUpdateCoordinator[dict[int, int]]):
         # The device's HTTP server is flaky under load: a single dropped
         # connection must never take down the whole coordinator, otherwise
         # every entity goes unavailable (and setup fails on first refresh).
-        results = await asyncio.gather(
-            *(self.api.read(s, c) for s, c in blocks),
-            return_exceptions=True,
-        )
+        results: list[dict[int, int] | Exception] = []
+        for start, count in blocks:
+            try:
+                results.append(await self.api.read(start, count))
+            except Exception as err:  # noqa: BLE001 - one failed block must not drop the others
+                results.append(err)
 
         # Carry over previously read registers; successful reads overwrite.
         merged: dict[int, int] = dict(self.data or {})
@@ -125,6 +148,9 @@ class Ppe4Coordinator(DataUpdateCoordinator[dict[int, int]]):
             raise UpdateFailed("all register reads failed")
         if slow_due:
             self._last_slow = now
+        drawing = merged.get(1137, 0) > 0 or merged.get(1138, 0) > 0
+        # pylint: disable-next=attribute-defined-outside-init  # defined by DataUpdateCoordinator
+        self.update_interval = self._flow_interval if drawing else self._idle_interval
         return merged
 
 
@@ -132,13 +158,22 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     host = entry.data[CONF_HOST]
     session = async_get_clientsession(hass)
     api = Ppe4Api(host, session)
-    interval = int(entry.options.get("scan_interval", 5))
-    coordinator = Ppe4Coordinator(hass, api, interval)
+    coordinator = Ppe4Coordinator(
+        hass,
+        api,
+        int(entry.options.get("scan_interval", DEFAULT_SCAN_INTERVAL)),
+        int(entry.options.get("flow_interval", DEFAULT_FLOW_INTERVAL)),
+        int(entry.options.get("stats_interval", DEFAULT_STATS_INTERVAL)),
+    )
     await coordinator.async_config_entry_first_refresh()
     entry.runtime_data = Ppe4RuntimeData(api=api, coordinator=coordinator)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     entry.async_on_unload(entry.add_update_listener(_async_update_listener))
     return True
+
+
+async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
 
 
 async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:

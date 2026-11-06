@@ -19,8 +19,21 @@ from homeassistant.helpers.device_registry import DeviceEntryType
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN
+from .registers import (
+    ENERGY_MONTHS,
+    ENERGY_TODAY,
+    ENERGY_TOTAL,
+    ENERGY_YEAR,
+    WATER_MONTHS,
+    WATER_TODAY,
+    WATER_TOTAL,
+    WATER_YEAR,
+    month_register,
+    pair,
+)
 
 
 async def async_setup_entry(
@@ -37,17 +50,24 @@ async def async_setup_entry(
                    SensorDeviceClass.VOLUME_FLOW_RATE, 0.1, state_class=SensorStateClass.MEASUREMENT),
         Ppe4Sensor(coordinator, entry, 1138, "power_current", UnitOfPower.KILO_WATT,
                    SensorDeviceClass.POWER, 0.001, state_class=SensorStateClass.MEASUREMENT),
-        # Energy meter for the Energy Dashboard (register 1520 = month kWh ×1000)
-        Ppe4Sensor(coordinator, entry, 1520, "energy_month", UnitOfEnergy.KILO_WATT_HOUR,
-                   SensorDeviceClass.ENERGY, 0.001, state_class=SensorStateClass.TOTAL_INCREASING),
-        # Energy today: register 1510 = today kWh ×1000
-        Ppe4Sensor(coordinator, entry, 1510, "energy_today", UnitOfEnergy.KILO_WATT_HOUR,
-                   SensorDeviceClass.ENERGY, 0.001, state_class=SensorStateClass.TOTAL_INCREASING),
-        # Water: today (1578, ×0.1 l) and this month (1644/1645 pair handled below)
-        Ppe4Sensor(coordinator, entry, 1578, "water_today", UnitOfVolume.LITERS,
-                   SensorDeviceClass.WATER, 0.1, state_class=SensorStateClass.TOTAL_INCREASING),
-        Ppe4WaterMonth(coordinator, entry),
-        Ppe4ModeSensor(coordinator, entry),
+        # Lifetime meters for the Energy Dashboard — they never reset
+        Ppe4Counter(coordinator, entry, ENERGY_TOTAL, "energy_total", UnitOfEnergy.KILO_WATT_HOUR,
+                    SensorDeviceClass.ENERGY, 0.001),
+        Ppe4Counter(coordinator, entry, WATER_TOTAL, "water_total", UnitOfVolume.LITERS,
+                    SensorDeviceClass.WATER, 0.1),
+        # Period counters kept by the heater (energy in Wh, water in 0.1 l)
+        Ppe4Counter(coordinator, entry, ENERGY_TODAY, "energy_today", UnitOfEnergy.KILO_WATT_HOUR,
+                    SensorDeviceClass.ENERGY, 0.001),
+        Ppe4Counter(coordinator, entry, ENERGY_MONTHS, "energy_month", UnitOfEnergy.KILO_WATT_HOUR,
+                    SensorDeviceClass.ENERGY, 0.001, monthly=True),
+        Ppe4Counter(coordinator, entry, ENERGY_YEAR, "energy_year", UnitOfEnergy.KILO_WATT_HOUR,
+                    SensorDeviceClass.ENERGY, 0.001),
+        Ppe4Counter(coordinator, entry, WATER_TODAY, "water_today", UnitOfVolume.LITERS,
+                    SensorDeviceClass.WATER, 0.1),
+        Ppe4Counter(coordinator, entry, WATER_MONTHS, "water_month", UnitOfVolume.LITERS,
+                    SensorDeviceClass.WATER, 0.1, monthly=True),
+        Ppe4Counter(coordinator, entry, WATER_YEAR, "water_year", UnitOfVolume.LITERS,
+                    SensorDeviceClass.WATER, 0.1),
         Ppe4StatusSensor(coordinator, entry),
     ])
 
@@ -81,6 +101,7 @@ class Ppe4Sensor(Ppe4Entity, SensorEntity):
         "energy_month": "mdi:calendar-month",
         "energy_today": "mdi:counter",
         "water_today": "mdi:cup-water",
+        "water_total": "mdi:water",
     }
 
     def __init__(self, coordinator, entry, register: int, key: str, unit,
@@ -109,40 +130,30 @@ class Ppe4Sensor(Ppe4Entity, SensorEntity):
         return None if raw is None else round(raw * self._scale, 2)
 
 
-class Ppe4WaterMonth(Ppe4Entity, SensorEntity):
-    """32-bit water-month counter from register pair 1644/1645 (÷100 l)."""
+class Ppe4Counter(Ppe4Sensor):
+    """32-bit lo/hi counter; `monthly` picks the current month from a January-first block."""
 
-    _attr_translation_key = "water_month"
-    _attr_native_unit_of_measurement = UnitOfVolume.LITERS
-    _attr_device_class = SensorDeviceClass.WATER
-    _attr_state_class = SensorStateClass.TOTAL_INCREASING
+    # pylint: disable-next=too-many-arguments
+    def __init__(self, coordinator, entry, register: int, key: str, unit,
+                 device_class, scale: float, monthly: bool = False) -> None:  # noqa: PLR0913 - explicit config
+        super().__init__(coordinator, entry, register, key, unit, device_class, scale,
+                         state_class=SensorStateClass.TOTAL_INCREASING)
+        self._monthly = monthly
 
-    def __init__(self, coordinator, entry: ConfigEntry) -> None:
-        super().__init__(coordinator, entry, "water_month")
+    def _raw(self) -> int | None:
+        register = self._register
+        if self._monthly:
+            register = month_register(register, dt_util.now().month)
+        return pair(self.coordinator.data or {}, register)
+
+    @property
+    def available(self) -> bool:
+        return self.coordinator.last_update_success and self._raw() is not None
 
     @property
     def native_value(self):
-        d = self.coordinator.data or {}
-        lo, hi = d.get(1644), d.get(1645)
-        if lo is None:
-            return None
-        return round((lo + (hi or 0) * 65536) / 100, 1)
-
-
-class Ppe4ModeSensor(Ppe4Entity, SensorEntity):
-    """Register 1390 — 0 = profile, 1 = manual."""
-
-    _attr_translation_key = "mode"
-    _attr_icon = "mdi:state-machine"
-    _MODES = {0: "profile", 1: "manual"}
-
-    def __init__(self, coordinator, entry: ConfigEntry) -> None:
-        super().__init__(coordinator, entry, "mode")
-
-    @property
-    def native_value(self) -> str | None:
-        raw = self.coordinator.data.get(1390)
-        return None if raw is None else self._MODES.get(raw, str(raw))
+        raw = self._raw()
+        return None if raw is None else round(raw * self._scale, 3)
 
 
 class Ppe4StatusSensor(Ppe4Entity, SensorEntity):

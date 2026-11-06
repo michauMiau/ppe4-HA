@@ -23,9 +23,11 @@
       "init": {
         "data": {
           "host": "Adres IP",
-          "scan_interval": "Interwał odświeżania na żywo (sekundy)"
+          "scan_interval": "Interwał odświeżania na żywo (sekundy)",
+          "flow_interval": "Interwał odświeżania podczas poboru wody (sekundy)",
+          "stats_interval": "Interwał statystyk (sekundy)"
         },
-        "description": "Dane na żywo (temperatury, przepływ, moc) odświeżają się w tym interwale. Statystyki i tak aktualizują się co 30 s."
+        "description": "Dane na żywo (temperatury, przepływ, moc) odświeżają się w interwale na żywo, a podczas poboru wody w interwale poboru, jeśli jest krótszy. Statystyki, profile i limity odświeżają się w interwale statystyk."
       }
     }
   },
@@ -57,14 +59,23 @@
       "water_month": {
         "name": "Woda zużyta w tym miesiącu"
       },
-      "mode": {
-        "name": "Tryb pracy"
-      },
       "status": {
         "name": "Status podgrzewacza"
       },
       "energy_today": {
         "name": "Energia zużyta dzisiaj"
+      },
+      "energy_total": {
+        "name": "Energia zużyta łącznie"
+      },
+      "energy_year": {
+        "name": "Energia zużyta w tym roku"
+      },
+      "water_total": {
+        "name": "Woda zużyta łącznie"
+      },
+      "water_year": {
+        "name": "Woda zużyta w tym roku"
       }
     },
     "binary_sensor": {
@@ -85,7 +96,13 @@
     },
     "select": {
       "profile": {
-        "name": "Aktywny profil"
+        "name": "Aktywny profil",
+        "state": {
+          "manual": "Ręczny",
+          "profile_1": "Profil 1",
+          "profile_2": "Profil 2",
+          "profile_3": "Profil 3"
+        }
       }
     }
   }
