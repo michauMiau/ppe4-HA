@@ -1,10 +1,13 @@
 name: Validate with hassfest
-
 on:
   push:
+    branches: [main]
+    paths:
+      - 'custom_components/**'
   pull_request:
-
-
+    branches: [main]
+    paths:
+      - 'custom_components/**'
 jobs:
   validate:
     runs-on: "ubuntu-latest"
