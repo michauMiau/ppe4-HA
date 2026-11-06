@@ -1,16 +1,17 @@
 <div align=center>
+   <img src=custom_components/kospel_ppe4/brand/icon.png>
    <h2>
-Integration for the KOSPEL PPE4 Water heater in Home Assistant.
-   </h2>
+KOSPEL PPE4 Water heater integration for Home Assistant.
+   </h2> 
 </div>
 
-Also check out [KDE Connect for Home Assistant](https://github.com/michauMiau/kde-connect-ha), the sibling integration in this family.
+> Also check out [KDE Connect for Home Assistant](https://github.com/michauMiau/kde-connect-ha), another helpful integration also made by me.
 
 ## Features
 
-- **Sensors**: target temperature, min/max setpoints, limits, current power, operating mode
-- **Number entity**: set the target temperature (slider) — written directly to the heater
-- Local HTTP polling (30 s), no cloud
+- **Sensors**: target temperature, min/max setpoints, limits, power sensors, operating mode
+- **Profile selection**: set temperature profiles like on the official app
+- **Local** HTTP polling, no cloud
 
 ## Installation
 
@@ -21,7 +22,7 @@ Also check out [KDE Connect for Home Assistant](https://github.com/michauMiau/kd
 1. Click the badge above (or **Marketplace → ⋮ → Custom repositories**)
 2. Repository: `michauMiau/ppe4-HA`, category: **Integration**
 3. Click **Download** on *KOSPEL PPE4*.
-4. Restart Home Assistant.
+4. Add the device (see below). 
 
 ### Manual
 
@@ -33,7 +34,7 @@ Also check out [KDE Connect for Home Assistant](https://github.com/michauMiau/kd
 [![Open your Home Assistant instance and start setting up.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=kospel_ppe4)
 
 Or: *Settings → Devices & Services → Add Integration → **KOSPEL PPE4***.
-The config flow requires you to type ip of your heater, it's visible in the app.
+The config flow requires you to type IP of your heater, it's visible in the app.
 
 ### Energy Dashboard
 
