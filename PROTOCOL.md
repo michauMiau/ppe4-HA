@@ -25,6 +25,8 @@ JSON musi być zwarty: `{"1390": 1}` ze spacją po dwukropku też kończy się b
 | Rejestr | Znaczenie | Skala |
 | --- | --- | --- |
 | 1129 | flaga statusu (5=parowanie?, 1=normalny) | — |
+| 1130/1131 | słowo błędów E, bity wg manuala EN-116B (`errors.py`), niepotwierdzone na żywo | — |
+| 1132/1133 | słowo ostrzeżeń W, bity wg manuala EN-116B (`errors.py`), niepotwierdzone na żywo | — |
 | 1134 / 1135 | Tin / Tout (temperatura wejścia/wyjścia) | ×0.1 °C |
 | 1137 | przepływ (tylko podczas poboru wody) | ×0.1 l/min |
 | 1138 | aktualna moc grzania (tylko podczas poboru) | ÷1000 kW |

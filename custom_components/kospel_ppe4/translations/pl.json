@@ -76,6 +76,12 @@
       },
       "water_year": {
         "name": "Woda zużyta w tym roku"
+      },
+      "errors": {
+        "name": "Aktywne błędy"
+      },
+      "warnings": {
+        "name": "Aktywne ostrzeżenia"
       }
     },
     "binary_sensor": {

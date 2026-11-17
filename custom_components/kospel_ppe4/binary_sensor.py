@@ -1,4 +1,4 @@
-"""Binary sensors and diagnostics for KOSPEL PPE4 fault flags."""
+"""Binary sensor and diagnostic attributes for KOSPEL PPE4 faults."""
 from __future__ import annotations
 
 from homeassistant.components.binary_sensor import BinarySensorEntity
@@ -7,10 +7,10 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
+from .errors import ERROR_BITS, WARNING_BITS, decode
+from .registers import pair
 from .sensor import Ppe4Entity
 
-# Fault flag registers observed at 0 during normal operation.
-# Meaning per flag is not yet confirmed — see ERRORS.md in the repo.
 FAULT_REGISTERS = (1130, 1131, 1132, 1133)
 
 
@@ -22,7 +22,7 @@ async def async_setup_entry(
 
 
 class Ppe4FaultSensor(Ppe4Entity, BinarySensorEntity):
-    """ON when any fault flag register is non-zero."""
+    """ON when any fault register is non-zero."""
 
     _attr_translation_key = "fault"
     _attr_entity_category = EntityCategory.DIAGNOSTIC
@@ -42,8 +42,14 @@ class Ppe4FaultSensor(Ppe4Entity, BinarySensorEntity):
     @property
     def extra_state_attributes(self):
         d = self.coordinator.data or {}
-        attrs = {f"flag_{r}": d.get(r) for r in FAULT_REGISTERS}
-        # status word: 1 = idle/normal, 5 = heating/pairing (see PROTOCOL.md)
-        attrs["status"] = d.get(1129)
-        attrs["device_code"] = d.get(1136)
-        return attrs
+        error_word = pair(d, 1130)
+        warning_word = pair(d, 1132)
+        return {
+            **{f"flag_{r}": d.get(r) for r in FAULT_REGISTERS},
+            "status": d.get(1129),
+            "device_code": d.get(1136),
+            "error_word": error_word,
+            "warning_word": warning_word,
+            "errors": [] if error_word is None else decode(error_word, ERROR_BITS),
+            "warnings": [] if warning_word is None else decode(warning_word, WARNING_BITS),
+        }

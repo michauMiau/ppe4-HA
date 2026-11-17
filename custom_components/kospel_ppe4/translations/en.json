@@ -77,6 +77,12 @@
       },
       "water_year": {
         "name": "Water used this year"
+      },
+      "errors": {
+        "name": "Active errors"
+      },
+      "warnings": {
+        "name": "Active warnings"
       }
     },
     "binary_sensor": {

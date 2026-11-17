@@ -37,6 +37,14 @@ Aplikacja wypełnia listy błędów/ostrzeżeń z bloku statusu. Prawdopodobne p
 
 Weryfikacja: wymusić usterkę (np. odłączyć czujnik) i odczytać, który rejestr się zmienia.
 
+## Implementacja w integracji
+`errors.py` zawiera mapy bitów z manuala EN-116B_f.1535: E01–E11 w parze 1130/1131,
+W01–W17 w parze 1132/1133. Sensory diagnostyczne "Aktywne błędy" i "Aktywne
+ostrzeżenia" dekodują te słowa, a encja "Usterka" dodaje kody do atrybutów obok
+surowych flag. Powyższe przypisanie z dekompilacji nie jest zgodne z mapą z
+manuala i pozostaje niepotwierdzone. Wymuszenie usterki rozstrzygnie, która mapa
+obowiązuje.
+
 ## Uwaga
 Dokładne mapowanie kod liczbowy ↔ tekst wymaga jeszcze korelacji z rejestrami
 w czasie rzeczywistym (np. wymusić błąd), ale lista tekstów jest kompletna.

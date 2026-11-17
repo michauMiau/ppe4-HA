@@ -22,6 +22,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.util import dt as dt_util
 
 from .const import DOMAIN
+from .errors import ERROR_BITS, WARNING_BITS, decode
 from .registers import (
     ENERGY_MONTHS,
     ENERGY_TODAY,
@@ -68,6 +69,8 @@ async def async_setup_entry(
                     SensorDeviceClass.WATER, 0.1, monthly=True),
         Ppe4Counter(coordinator, entry, WATER_YEAR, "water_year", UnitOfVolume.LITERS,
                     SensorDeviceClass.WATER, 0.1),
+        Ppe4CodeSensor(coordinator, entry, "errors", 1130, ERROR_BITS),
+        Ppe4CodeSensor(coordinator, entry, "warnings", 1132, WARNING_BITS),
         Ppe4StatusSensor(coordinator, entry),
     ])
 
@@ -170,3 +173,30 @@ class Ppe4StatusSensor(Ppe4Entity, SensorEntity):
     def native_value(self) -> str | None:
         raw = self.coordinator.data.get(1129)
         return None if raw is None else self._STATES.get(raw, str(raw))
+
+
+class Ppe4CodeSensor(Ppe4Entity, SensorEntity):
+    """Decoded error or warning codes from a 32-bit register pair."""
+
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+
+    # pylint: disable-next=too-many-arguments
+    def __init__(self, coordinator, entry: ConfigEntry, key: str, register: int,
+                 bits: dict[int, tuple[str, str]]) -> None:  # noqa: PLR0913 - explicit config
+        super().__init__(coordinator, entry, key)
+        self._attr_translation_key = key
+        self._attr_icon = "mdi:alert" if key == "warnings" else "mdi:alert-circle"
+        self._register = register
+        self._bits = bits
+
+    @property
+    def available(self) -> bool:
+        return (self.coordinator.last_update_success
+                and self._register in (self.coordinator.data or {}))
+
+    @property
+    def native_value(self) -> str:
+        word = pair(self.coordinator.data or {}, self._register)
+        if not word:
+            return "none"
+        return "; ".join(decode(word, self._bits))
